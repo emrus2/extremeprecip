@@ -133,7 +133,7 @@ plottitle = {'Z500':'Z500','SLP':'SLP','IVT':'IVT','300W':'300 hPa Wind','850T':
 
 #create subplot for mapping multiple timesteps
 fig = plt.figure(figsize=(7.5,5.5))
-fig.suptitle(f'{plottitle[metvar]} SOMs',fontsize=13,fontweight="bold",y=0.9875)
+#fig.suptitle(f'{plottitle[metvar]} SOMs',fontsize=13,fontweight="bold",y=0.9875)
 
 for i, arr in enumerate(patterns):
     # reshape merra data for plotting
@@ -213,5 +213,5 @@ cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
 os.chdir(save_dir)
-plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM.png',dpi=300)
+plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_NoTitle.png',dpi=300)
 plt.show()
