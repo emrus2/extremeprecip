@@ -218,3 +218,5 @@ plt.show()
 
 #testing how GIT responds to changes
 print("This is a test - changes made")
+
+print('Testing branch stuff')
