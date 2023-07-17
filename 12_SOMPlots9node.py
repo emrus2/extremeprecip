@@ -215,3 +215,6 @@ save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
 os.chdir(save_dir)
 plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM.png',dpi=300)
 plt.show()
+
+#testing how GIT responds to changes
+print("This is a test - changes made")
