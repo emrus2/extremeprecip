@@ -44,21 +44,21 @@ lonmin, lonmax = (-124.5,-119.5)
 
 #%%
 #create directories for varying met data
-metvars = ['precip','mintemp','maxtemp','wind']
-metvar = 'precip'
+#metvars = ['precip','mintemp','maxtemp','wind']
+metvar = 'wind'
 
 metabbr = {'precip':'pr','mintemp':'tmmn','maxtemp':'tmmx','wind':'vs'}
 varnames = {'precip':'precipitation_amount','mintemp':'air_temperature','maxtemp':'air_temperature','wind':'wind_speed'}
-plottitles = {'precip':'Precipitation','mintemp':'Minimum Air Temperature','maxtemp':'Maximum Air Temperature','10mwinddir':'10m Wind Direction','10mwindspeed':'10m Wind Speed'}
+plottitles = {'precip':'Precipitation','mintemp':'Minimum Air Temperature','maxtemp':'Maximum Air Temperature','wind':'10m Wind'}
 
-lowlims = {'precip':0,'mintemp':'tmmn','maxtemp':'tmmx','10mwinddir':'th','10mwindspeed':'vs'}
-highlims = {'precip':150,'mintemp':'tmmn','maxtemp':'tmmx','10mwinddir':'th','10mwindspeed':'vs'}
+lowlims = {'precip':0,'mintemp':-12,'maxtemp':-12,'wind':0}
+highlims = {'precip':150,'mintemp':17,'maxtemp':17,'wind':15}
 
-cbarstart = {'precip':0,'mintemp':'tmmn','maxtemp':'tmmx','10mwinddir':'th','10mwindspeed':'vs'}
-cbarint = {'precip':25,'mintemp':'tmmn','maxtemp':'tmmx','10mwinddir':'th','10mwindspeed':'vs'}
+cbarstart = {'precip':0,'mintemp':-12,'maxtemp':-12,'wind':0}
+cbarint = {'precip':25,'mintemp':4,'maxtemp':4,'wind':3}
     
-colormap = {'precip':'gist_ncar_r','mintemp':'tmmn','maxtemp':'tmmx','10mwinddir':'th','10mwindspeed':'vs'}
-cbarlabs = {'precip':'mm','mintemp':'tmmn','maxtemp':'tmmx','10mwinddir':'th','10mwindspeed':'vs'}
+colormap = {'precip':'gist_ncar_r','mintemp':'turbo','maxtemp':'turbo','wind':'hot_r'}
+cbarlabs = {'precip':'mm','mintemp':u'\N{DEGREE SIGN}C','maxtemp':u'\N{DEGREE SIGN}C','wind':'m/s'}
 
 #%%
 #IMPORT NETCDF DATA
@@ -74,6 +74,7 @@ days = gridfile.variables['day'][:]
 gridfile.close()
 #dates = [datetime.strftime(datetime(1900,1,1)+timedelta(days=days[n]),"%Y%m%d") for n in range(days.shape[0])]
 
+#%%
 #REDUCE VARIABLES TO DESIRED AREA
 #reduce lat
 latlims = np.logical_and(gridlat > latmin, gridlat < latmax)
@@ -103,17 +104,24 @@ for som in range(numpatterns):
     som_merra = np.zeros((1,len(latreduced),len(lonreduced)))
     # loop through all days
     for day,arr in enumerate(merrareduced):
-        print(np.amax(arr))
+        #print(np.amax(arr))
         # add data to som_merra if day is assigned to node
         if assignment[day] == float(som + 1):
             som_merra = np.ma.concatenate((som_merra,np.expand_dims(arr,axis=0)))
-            print(np.amax(som_merra))
+            #print(np.amax(som_merra))
     # remove initial row of zeros
     som_merra = som_merra[1:,:,:]
     # calculate the mean of assigned days
     som_mean = np.squeeze(np.mean(som_merra,axis=0))
     # append to array of composites
     som_composites[som] = som_mean
+    
+#convert zeroes to NaNs
+som_composites[som_composites == 0] = 'nan'
+
+#convert K to C
+if 'temp' in metvar:
+    som_composites -= 273.15
     
 #%% INCLUDE WIND DIRECTION ALSO
 if metvar == 'wind':
@@ -133,7 +141,7 @@ if metvar == 'wind':
         som_merra = np.zeros((1,len(latreduced),len(lonreduced)))
         # loop through all days
         for day,arr in enumerate(merrareduced):
-            print(np.amax(arr))
+            #print(np.amax(arr))
             # add data to som_merra if day is assigned to node
             if assignment[day] == float(som + 1):
                 som_merra = np.ma.concatenate((som_merra,np.expand_dims(arr,axis=0)))
@@ -173,6 +181,8 @@ fig = plt.figure(figsize=(7.5,5.5))
 fig.suptitle(f'{plottitles[metvar]} Composites',fontsize=13,fontweight="bold",y=0.9875)
 
 for i, arr in enumerate(som_composites):
+    Uarr = Uwind[i,:,:]
+    Varr = Vwind[i,:,:]
     #MAP DESIRED VARIABLE
     #convert lat and lon into a 2D array
     #define area threshold for basemap
@@ -212,7 +222,8 @@ for i, arr in enumerate(som_composites):
         map.drawparallels(parallels, color=border_c,linewidth=border_w)
         map.drawmeridians(meridians,color=border_c,linewidth=border_w)
     #define contour color and thickness
-    contour_c = '0.1'
+    #contour_c = '0.1'
+    contour_c = 'b'
     contour_w = 0.7
     #create contour map
     if metvar == 'wind':
@@ -220,12 +231,13 @@ for i, arr in enumerate(som_composites):
         size = 1500
         skip = (slice(None, None, interval), slice(None, None, interval))
         #vectorm = map.quiver(xi2[skip],yi2[skip],U_arrs[skip],V_arrs[skip],color='darkgreen')
-        vectorm = map.quiver(xi[skip],yi[skip],Uwind[skip],Vwind[skip],pivot='mid',color='k')
-    #contourm = map.contour(xi,yi,arr,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]),zorder=2)
+        vectorm = map.quiver(xi[skip],yi[skip],Uarr[skip],Varr[skip],pivot='mid',color='k')
+    if metvar == 'mintemp':
+        contourm = map.contour(xi,yi,arr,colors=contour_c,linewidths=contour_w,levels=np.arange(0,1,1),zorder=2)
     #plt.clabel(contourm,levels=contourm.levels[::2],fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
         
     #add yuba shape
-    map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed)
+    map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,linewidth=0.6,zorder=3)
     #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
     
 #CUSTOMIZE SUBPLOT SPACING
@@ -240,5 +252,5 @@ cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
 os.chdir(save_dir)
-#plt.savefig(f'GRIMET_{metvar}_SOM_composite.png',dpi=300)
+plt.savefig(f'GRIMET_{metvar}_SOM_composite.png',dpi=300)
 plt.show()

@@ -30,19 +30,21 @@ extremedays = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_E
 #convert list of strings to datetime dataset
 extremedays_dt = pd.to_datetime(extremedays)
 #%%
-metvars = ['precip','mintemp','maxtemp','10mwinddir','10mwindspeed']
-metvar = 'precip'
+#metvars = ['precip','mintemp','maxtemp','10mwinddir','10mwindspeed']
+metvar = '10mwindspeed'
 metabbr = {'precip':'pr','mintemp':'tmmn','maxtemp':'tmmx','10mwinddir':'th','10mwindspeed':'vs'}
+metfolder = {'precip':'pr','mintemp':'temp','maxtemp':'temp','10mwinddir':'th_(10m_wind_direction)','10mwindspeed':'vs_(10m_wind_speed)'}
 
-folderpath = f'I:\\GRIDMET\\{metabbr[metvar]}'
-files = glob.glob(os.path.join(folderpath,"*.nc"))
-ds = xr.open_mfdataset(files, combine='nested', concat_dim='day')
+
+folderpath = f'I:\\GRIDMET\\{metfolder[metvar]}'    
+files = glob.glob(os.path.join(folderpath,f"{metabbr[metvar]}*.nc")) #should be length 44
+ds = xr.open_mfdataset(files, combine='nested', concat_dim='day') #16071 days
 print(ds)      
-ds_extreme = ds.sel(day = extremedays_dt)
+ds_extreme = ds.sel(day = extremedays_dt) #should be 260 days
 
 #%% SAVE EXTREMES DATASET
 #save as file
 #define new files directory and names
 os.chdir('I:\\Emma\\FIROWatersheds\\Data\\Gridmet')
-savefile = f'GRIDMET_{metabbr}_Yuba_Extremes90_Daily_1980-2021_WINTERDIST.nc'
+savefile = f'GRIDMET_{metabbr[metvar]}_Yuba_Extremes90_Daily_1980-2021_WINTERDIST.nc'
 ds_extreme.to_netcdf(savefile)

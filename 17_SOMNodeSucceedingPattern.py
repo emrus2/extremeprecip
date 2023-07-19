@@ -115,7 +115,7 @@ for s in np.arange(numpatterns):
     ax.set_facecolor('none')
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     ax.text(x=0.0, y=1.0, s=s+1, transform=ax.transAxes + sublabel_loc,
-        fontsize=9, fontweight='bold', verticalalignment='top',
+        fontsize=10, fontweight='bold', verticalalignment='top',
         bbox=dict(facecolor='1', alpha = 0, edgecolor='none', pad=1.5),zorder=3)
     ax.text(x=0.77, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
         fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
@@ -172,24 +172,36 @@ for s in np.arange(numpatterns):
     ax.set_xlim(0.5,6.5)
     ylabels = np.arange(1,numpatterns+1,1)
     xlabels = np.arange(1,7,1)
-    if s == 0 or s == 3:
+    # if s == 0 or s == 3:
+    #     ax.set_yticks(ylabels)
+    #     ax.set_xticks(xlabels, [])
+    #     if s == 3:
+    #         ax.set_ylabel('Node',fontweight='bold')
+    # elif s == 7 or s == 8:
+    #     ax.set_yticks(ylabels,[])
+    #     ax.set_xticks(xlabels)
+    #     if s == 7:
+    #         ax.set_xlabel('Duration (Days)',fontweight='bold')
+    # elif s == 6:
+    #     #ax.set_ylabel('Node',fontweight='bold')
+    #     ax.set_yticks(ylabels)
+    #     ax.set_xticks(xlabels)
+    #     #ax.set_xlabel('Duration (Days)',fontweight='bold')
+    # else:
+    #     ax.set_yticks(ylabels,[])
+    #     ax.set_xticks(xlabels, [])
+    if s in np.arange(6):
         ax.set_yticks(ylabels)
         ax.set_xticks(xlabels, [])
         if s == 3:
             ax.set_ylabel('Node',fontweight='bold')
-    elif s == 7 or s == 8:
-        ax.set_yticks(ylabels,[])
+    else:
+        ax.set_yticks(ylabels)
         ax.set_xticks(xlabels)
         if s == 7:
             ax.set_xlabel('Duration (Days)',fontweight='bold')
-    elif s == 6:
-        #ax.set_ylabel('Node',fontweight='bold')
-        ax.set_yticks(ylabels)
-        ax.set_xticks(xlabels)
-        #ax.set_xlabel('Duration (Days)',fontweight='bold')
-    else:
-        ax.set_yticks(ylabels,[])
-        ax.set_xticks(xlabels, [])
+    ax.tick_params(direction='in',which='both',axis='y')
+    #ax.grid(visible=True,axis='y')
         
     # plot accumulated precipitation
     ax2 = ax.twinx()
@@ -197,20 +209,22 @@ for s in np.arange(numpatterns):
     ax2.set_facecolor('none')
     ax2.bar(np.arange(1,maxnodeduration+1),avgprecip_accum,color='slategrey',alpha=0.4,width=1)
     ax2.set_ylim(0.5, 650)
-    ylabels = np.arange(0,670,150)
+    ylabels = np.arange(0,670,100)
     if s == 2 or s == 5 or s == 8:
-        ax2.set_yticks(ylabels)
+        ax2.set_yticks(ylabels,minor='true')
         if s == 5:
             ax2.set_ylabel('Precipitation (mm)',fontweight='bold')
     else:
-        ax2.set_yticks(ylabels,[])
-
+        ax2.set_yticks(ylabels,[],minor='true')
+        ax2.set_yticklabels([])
+    ax2.tick_params(direction='in',which='both',axis='y')
 
 #CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.051,right=0.93,bottom=0.08, top=0.98,hspace=0.05, wspace=0.05) #bottom colorbar
+#fig.subplots_adjust(left=0.051,right=0.93,bottom=0.08, top=0.98,hspace=0.05, wspace=0.05) #bottom colorbar
+fig.subplots_adjust(left=0.051,right=0.93,bottom=0.08, top=0.98,hspace=0.05, wspace=0.09) #bottom colorbar
 
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
 os.chdir(save_dir)
-plt.savefig(f'{percentile}_{numpatterns}_NodeSuccessionbyNodeAccumPrecip.png',dpi=300)
+plt.savefig(f'{percentile}_{numpatterns}_NodeSuccessionbyNodeAccumPrecip_1.png',dpi=300)
 plt.show()

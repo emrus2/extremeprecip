@@ -33,6 +33,7 @@ nc_dir = 'I:\\GRIDMET\\pr'
 filepath = os.path.join(nc_dir,nc_file)
 #open the netcdf file in read mode
 gridfile = nc.Dataset(filepath,mode='r')
+print(gridfile)
 gridlat = gridfile.variables['lat'][:]
 gridlon = gridfile.variables['lon'][:]
 gridday = gridfile.variables['day'][:]
