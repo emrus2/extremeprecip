@@ -23,8 +23,8 @@ from mpl_toolkits.basemap import Basemap #installed using
 import scipy.io
 
 #define watershed and directory for plotting
-#watershed = 'UpperYuba'
-#ws_directory = f'I:\\Emma\\FIROWatersheds\\Data\\WatershedShapefiles\\California\\{watershed}\\'
+watershed = 'UpperYuba'
+ws_directory = f'I:\\Emma\\FIROWatersheds\\Data\\WatershedShapefiles\\California\\{watershed}\\'
 
 #GENERATE CUSTOM COLORMAP
 def center_colormap(lowlim, highlim, center=0):
@@ -50,6 +50,7 @@ os.chdir(mat_dir)
 soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}_sompatterns.mat')
 patterns = soms['pats']
 pat_prop = np.squeeze(soms['pat_prop'])
+pat_freq = np.squeeze(soms['pat_freq'])
 gridlat = np.squeeze(soms['lat'])
 gridlon = np.squeeze(soms['lon'])
 
@@ -132,17 +133,19 @@ plottitle = {'Z500':'Z500','SLP':'SLP','IVT':'IVT','300W':'300 hPa Wind','850T':
 #%% PLOT NODES from MATLAB
 
 #create subplot for mapping multiple timesteps
-fig = plt.figure(figsize=(7.5,5.5))
+fig = plt.figure(figsize=(7.2,5))
 #fig.suptitle(f'{plottitle[metvar]} SOMs',fontsize=13,fontweight="bold",y=0.9875)
 
 for i, arr in enumerate(patterns):
     # reshape merra data for plotting
     merrareduced = arr.reshape(len(gridlat),len(gridlon))
     # define percentage of node assignment
-    perc_assigned = round(pat_prop[i]*100,1)
+    perc_assigned = str(round(pat_prop[i]*100,1))
     # define average precip
-    precipavg = precip_rounded[i]
-    
+    #precipavg = precip_rounded[i]
+    #patfreq_col = str(1 / (pat_freq[i]/17))
+    gbcolor = 1.1-(pat_freq[i]/44)
+    patfreq_col = (1,gbcolor,gbcolor)
     #MAP DESIRED VARIABLE
     #convert lat and lon into a 2D array
     lon, lat = np.meshgrid(gridlon,gridlat) 
@@ -155,14 +158,22 @@ for i, arr in enumerate(patterns):
     ax = fig.add_subplot(3,3,i+1)
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
-        fontsize=9, fontweight='bold', verticalalignment='top', 
+        fontsize=10, fontweight='bold', verticalalignment='top', 
         bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-    ax.text(x=0.75, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-        fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-    ax.text(x=0.4, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
-        fontsize=9, fontweight='bold', verticalalignment='top', color = 'blue',
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
+    if len(perc_assigned) == 4:
+        ax.text(x=0.755, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+            fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
+            bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
+    else:
+        ax.text(x=0.795, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+            fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
+            bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
+    # ax.text(x=0.75, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+    #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
+    #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
+    # ax.text(x=0.4, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
+    #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'blue',
+    #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
 
 
     #create colormap of MERRA2 data
@@ -198,13 +209,15 @@ for i, arr in enumerate(patterns):
     plt.clabel(contourm,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]*2),fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
         
     #add yuba shape
-    #map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,linewidth=0.8,color='r')
-    plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
+    #map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,linewidth=0.8,color='w')
+    #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
+    plt.scatter(-120.9,39.5,color='w',marker='*',linewidths=0.7,zorder=4)
+
     
 #CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.05,right=0.89,bottom=0.021, top=0.955,hspace=0.05, wspace=0.05) #bottom colorbar
+fig.subplots_adjust(left=0.05,right=0.9,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
 #fig.add_axis([left,bottom, width,height])
-cbar_ax = fig.add_axes([0.904,0.05,0.025,0.88]) #bottom colorbar
+cbar_ax = fig.add_axes([0.91,0.05,0.025,0.9]) #bottom colorbar
 cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='vertical')
 cbar.ax.tick_params(labelsize=8)
 cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')

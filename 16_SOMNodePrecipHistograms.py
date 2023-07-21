@@ -35,7 +35,7 @@ mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
 soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}_sompatterns.mat')
 pat_prop = np.squeeze(soms['pat_prop'])
-
+pat_freq = np.squeeze(soms['pat_freq'])
 #%% IMPORT AVERAGE PRECIP DATA
 avgprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip.npy')
 avgprecip_rounded = np.round(a=avgprecip,decimals=1)
@@ -56,7 +56,7 @@ binlist = [np.arange(50,240,10)]
 width = 0.8  # the width of the bars
 multiplier = 0
 
-fig = plt.figure(figsize=(7.5,5.4))
+fig = plt.figure(figsize=(7.2,5))
 #fig.suptitle('Node Precipitation',fontsize=13,fontweight="bold",y=0.9875)
 
 if percentile == 95:
@@ -79,24 +79,30 @@ for i,node in enumerate(allprecip):
     perc_assigned = round(pat_prop[i]*100,1)
     precipavg = avgprecip_rounded[i]
     precipmed = medprecip_rounded[i]
+    #create colors
+    precipmednorm = 0.8-(((precipmed-min(medprecip_rounded))/(max(medprecip_rounded)+7-min(medprecip_rounded))))
+    precipmed_col = (precipmednorm,1,precipmednorm)
+    precipavgnorm = 0.8-(((precipavg-min(avgprecip_rounded))/(max(avgprecip_rounded)+7-min(avgprecip_rounded))))
+    precipavg_col = (precipavgnorm,precipavgnorm,1)
+    print(precipavg_col)
     offset = width * multiplier
     ax = fig.add_subplot(3,3,i+1)
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
-        fontsize=9, fontweight='bold', verticalalignment='top',
+        fontsize=10, fontweight='bold', verticalalignment='top',
         bbox=dict(facecolor='1', alpha = 0.8, edgecolor='none', pad=1.5),zorder=3)
-    ax.text(x=0.77, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-        fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-    ax.text(x=0.4, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
-        fontsize=9, fontweight='bold', verticalalignment='top', color = 'blue',
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-    ax.text(x=0.4, y=0.9, s=precipmed, transform=ax.transAxes + sublabel_loc,
-        fontsize=9, fontweight='bold', verticalalignment='top', color = 'g',
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
+    # ax.text(x=0.77, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+    #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
+    #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
+    ax.text(x=0.825, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
+        fontsize=8, fontweight='bold', verticalalignment='top', color = 'k',
+        bbox=dict(facecolor=precipavg_col, edgecolor='none', pad=1.5),zorder=3)
+    ax.text(x=0.825, y=0.88, s=precipmed, transform=ax.transAxes + sublabel_loc,
+        fontsize=8, fontweight='bold', verticalalignment='top', color = 'k',
+        bbox=dict(facecolor=precipmed_col, edgecolor='none', pad=1.5),zorder=3)
     freqs = plt.hist(node,color=colors[i],label=i+1,align='mid',bins=binlist[0])
-    plt.axvline(x=precipavg,color='blue',alpha=0.8)
-    plt.axvline(x=precipmed,color='g',alpha=0.8)
+    plt.axvline(x=precipavg,color=(0,0,1))
+    plt.axvline(x=precipmed,color=(0,1,0))
     
     #ax.annotate(precipavg,xy=(precipavg+3,14),color='blue',fontsize='9',fontweight='bold',zorder=3)
     #ax.annotate(precipmed,xy=(precipavg+3,12),color='magenta',fontsize='9',fontweight='bold',zorder=4)
@@ -107,24 +113,26 @@ for i,node in enumerate(allprecip):
     ax.set_xlim(xmin,xmax)
     if i == 0 or i == 3:
         ax.set_yticks(ylabels)
-        ax.set_ylabel('Days',fontweight='bold')
         ax.set_xticks(xlabels, [])
+        if i == 3:
+            ax.set_ylabel('Days',fontweight='bold')
     elif i == 7 or i == 8:
         ax.set_yticks(ylabels,[])
         ax.set_xticks(xlabels)
-        ax.set_xlabel('Precipitation (mm)',fontweight='bold')
+        if i == 7:
+            ax.set_xlabel('Precipitation (mm)',fontweight='bold')
     elif i == 6:
-        ax.set_ylabel('Days',fontweight='bold')
         ax.set_yticks(ylabels)
         ax.set_xticks(xlabels)
-        ax.set_xlabel('Precipitaiton (mm)',fontweight='bold')
     else:
         ax.set_yticks(ylabels,[])
         ax.set_xticks(xlabels, [])
+    ax.tick_params(direction='in',which='both',axis='y')
+
 
 #CUSTOMIZE SUBPLOT SPACING
 #fig.subplots_adjust(left=0.065,right=0.985,bottom=0.08, top=0.95,hspace=0.05, wspace=0.05) #bottom colorbar
-fig.subplots_adjust(left=0.065,right=0.985,bottom=0.08, top=0.98,hspace=0.05, wspace=0.05) #bottom colorbar
+fig.subplots_adjust(left=0.065,right=0.985,bottom=0.082, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
 
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'

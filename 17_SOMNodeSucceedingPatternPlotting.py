@@ -70,7 +70,7 @@ def pathfreq(node):
 #%% SUBPLOTS OF NODES
 colors = ('tomato','indianred','gold','lightgreen','mediumseagreen','cornflowerblue','royalblue','plum','darkorchid','magenta','tomato','indianred','gold','lightgreen','mediumseagreen','cornflowerblue','royalblue','plum','darkorchid','magenta')
 
-fig = plt.figure(figsize=(7.9,5.4))
+fig = plt.figure(figsize=(7.2,5))
 #fig.suptitle('Event Node Succession',fontsize=13,fontweight="bold",y=0.9875)
 
 for node in np.arange(numpatterns):
@@ -90,10 +90,9 @@ for node in np.arange(numpatterns):
         fontsize=10, fontweight='bold', verticalalignment='top',
         bbox=dict(facecolor='1', alpha = 0, edgecolor='none', pad=1.5),zorder=3)
     # add percentage labels
-    ax.text(x=0.77, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-        fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
-        bbox=dict(facecolor='1', alpha=0,edgecolor='none', pad=1.5),zorder=3)
-    
+    # ax.text(x=0.77, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+    #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
+    #     bbox=dict(facecolor='1', alpha=0,edgecolor='none', pad=1.5),zorder=3)
     # loop through events
     for event,assign in enumerate(alleventnodes):
         assign = [a for a in assign if a != 0]
@@ -144,13 +143,20 @@ for node in np.arange(numpatterns):
     # count the number of items in final destination                
     destinationcount = [[x,finaldestination.count(x)] for x in finaldestination]
     for destinations, count in destinationcount:
-        ax.annotate(count,xy=destinations,fontsize='10',fontweight='bold',zorder=3)
+        ax.annotate(count,xy=destinations,fontsize='8',fontweight='bold',zorder=3)
     
     # calculate average event duration
     nodedurationaverage = np.mean(nodeduration)
-    plt.axvline(nodedurationaverage,color='magenta',alpha=0.8,zorder=1)
-    ax.annotate(f'{round(nodedurationaverage,2):.2f}',xy=(5.5,0.9),color='magenta',fontsize='9',fontweight='bold',zorder=3)
-     
+    #plt.axvline(nodedurationaverage,color='magenta',alpha=0.8,zorder=1)
+    #ax.annotate(f'{round(nodedurationaverage,2):.2f}',xy=(5.5,0.9),color='magenta',fontsize='9',fontweight='bold',zorder=3)
+    nodedurnorm = 1.6 - nodedurationaverage
+    nodedurnorm = 0.9-(((nodedurationaverage-1.13)/0.5))
+    nodedur_col = (1,nodedurnorm,1)
+    print(nodedur_col)
+    ax.text(x=0.815, y=0.14, s=f'{round(nodedurationaverage,2):.2f}', transform=ax.transAxes + sublabel_loc,
+        fontsize=8, fontweight='bold', verticalalignment='top', color = 'k',
+        bbox=dict(facecolor=nodedur_col, edgecolor='none', pad=1.5),zorder=3)
+
     # adjust plotting       
     ax.set_ylim(0.5, numpatterns+0.8)
     ax.set_xlim(0.5,6.5)
@@ -186,7 +192,7 @@ for node in np.arange(numpatterns):
     ax2.tick_params(direction='in',which='both',axis='y')
 
 #CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.051,right=0.93,bottom=0.08, top=0.98,hspace=0.05, wspace=0.09) #bottom colorbar
+fig.subplots_adjust(left=0.051,right=0.93,bottom=0.085, top=0.985,hspace=0.05, wspace=0.09) #bottom colorbar
 
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
