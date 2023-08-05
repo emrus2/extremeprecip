@@ -54,7 +54,7 @@ ex_precip = extremes.variables['precipitation_amount'][:]
 #%%
 #line1 = plt.plot(dates,extremes,marker='.',linewidth=0.1,color='red',label='> 95th Percentile',zorder=5)
 #line2 = plt.plot(dates,precip,marker='.',linewidth=0.1,color='blue',label ='< 95th Percentile')
-fig = plt.figure(figsize=(7,5))
+fig, ax = plt.subplots(layout='constrained')
 
 line1 = plt.plot(dates,ex_precip,marker='.',linewidth=0,color='red',label=f'> {percentile}th Percentile',zorder=5)
 line2 = plt.plot(dates,precip,marker='.',linewidth=0.1,color='blue')
@@ -63,19 +63,21 @@ if percentile == 95:
     extrlim = 63.17607498
 elif percentile == 90:
     extrlim = 51.53282318
-plt.axhline(y=extrlim,color='red',linewidth=2,alpha=0.5)
-plt.xlabel('Year')
-plt.ylabel('Precipitation (mm)')
-plt.title('Winter Season Daily Mean Precipitation',fontweight='bold')
-plt.legend(loc='upper left')
+ax.axhline(y=extrlim,color='red',linewidth=2,alpha=0.5)
+ax.set_xlabel('Year',fontweight='bold')
+ax.set_ylabel('Precipitation (mm)',fontweight='bold')
+ax.tick_params(direction='in',which='both',axis='y')
+#plt.title('Winter Season Daily Mean Precipitation',fontweight='bold')
+ax.legend(loc='upper left')
+ax.set_xbound(3348,19300)
 
 save_dir=f'I:\\Emma\\FIROWatersheds\\Figures\\{watershed_name}'
 os.chdir(save_dir)
 plt.savefig(f'DailyMeanPrecip_{percentile}Extremes.png',bbox_inches='tight',pad_inches=0.1,dpi=300)
 plt.show()
 #%%
-plt.hist(totals,bins=50,color='blue')
-plt.hist(extremes,bins=50,color="red")
-plt.xlabel('Number of Days')
-plt.ylabel('Precipitation (mm)')
-plt.title('Histogram of Daily Mean Precipitation in Upper Yuba Watershed (1979-2022)')
+# plt.hist(totals,bins=50,color='blue')
+# plt.hist(extremes,bins=50,color="red")
+# plt.xlabel('Number of Days')
+# plt.ylabel('Precipitation (mm)')
+# plt.title('Histogram of Daily Mean Precipitation in Upper Yuba Watershed (1979-2022)')

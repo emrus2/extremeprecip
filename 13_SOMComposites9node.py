@@ -46,8 +46,8 @@ lonmin, lonmax = (-170.25,-105.75)
 
 #%% IMPORT MERRA2 DATA
 # define metvar
-metvars = ['SLP', '300W','Z500Anom','SLPAnom','Z850','850T','850TAnom']
-metvars = ['850TAnom']
+metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850T','850TAnom']
+metvars = ['SLP','Z850']
 #metvar = '300W'
 for metvar in metvars:
     #define composite location
@@ -137,7 +137,7 @@ for metvar in metvars:
             U_merra = U_merra[1:,:,:]
             V_merra = V_merra[1:,:,:]
             # confirm correct number of days assigned to node
-            print(som+1,len(U_merra),pat_freq[som])
+            #print(som+1,len(U_merra),pat_freq[som])
             # calculate the mean of assigned days
             U_mean = np.squeeze(np.mean(U_merra,axis=0))
             V_mean = np.squeeze(np.mean(V_merra,axis=0))
@@ -162,7 +162,7 @@ for metvar in metvars:
         # remove initial row of zeros
         som_merra = som_merra[1:,:,:]
         # confirm correct number of days assigned to node
-        print(som+1,len(som_merra),pat_freq[som])
+        #print(som+1,len(som_merra),pat_freq[som])
         # calculate the mean of assigned days
         som_mean = np.squeeze(np.mean(som_merra,axis=0))
         # append to array of composites
@@ -177,13 +177,13 @@ for metvar in metvars:
         #determine zmax and zmin for all days
         highlim = np.nanmax(arr)
         lowlim = np.nanmin(arr)
-        print(lowlim,highlim)
+        #print(lowlim,highlim)
         if highlim > zmax:
             zmax = highlim
         if lowlim < zmin:
             zmin = lowlim
     
-    print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
+    #print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
     
     #%% CREATE ANOMALY MAP 
     #GENERATE CUSTOM COLORMAP
@@ -198,44 +198,44 @@ for metvar in metvars:
         return newmap
     
     #%% DEFINE PLOTTING VARIABLES
-    if percentile == 95:
-        if metvar == 'Z500Anom':
-            lowanom, highanom = (-2.2, 1.4)
-            newmap = center_colormap(lowanom, highanom, center=0)
-        elif metvar == 'SLPAnom':
-            lowanom, highanom = (-2.8, 1.0)
-            newmap = center_colormap(lowanom, highanom, center=0)
-        elif metvar == '850TAnom':
-            lowanom, highanom = (-1.3, 1.2)
-            newmap = center_colormap(lowanom, highanom, center=0)
-    #create subplot for mapping multiple timesteps
-        lowlims = {'Z500':2850,'SLP':978,'IVT':0,'300W':0,'850T':248,'Z500Anom':lowanom,'Z850':1138,'SLPAnom':lowanom}
-        highlims = {'Z500':5700,'SLP':1025,'IVT':800,'300W':63,'850T':293,'Z500Anom':highanom,'Z850':1554,'SLPAnom':highanom}
+    # if percentile == 95:
+    #     if metvar == 'Z500Anom':
+    #         lowanom, highanom = (-2.2, 1.4)
+    #         newmap = center_colormap(lowanom, highanom, center=0)
+    #     elif metvar == 'SLPAnom':
+    #         lowanom, highanom = (-2.8, 1.0)
+    #         newmap = center_colormap(lowanom, highanom, center=0)
+    #     else:
+    #         lowanom, highanom = (-1.3, 1.2)
+    #         newmap = center_colormap(lowanom, highanom, center=0)
+    # #create subplot for mapping multiple timesteps
+    #     lowlims = {'Z500':2850,'SLP':978,'IVT':0,'300W':0,'850T':248,'Z500Anom':lowanom,'Z850':1138,'SLPAnom':lowanom}
+    #     highlims = {'Z500':5700,'SLP':1025,'IVT':800,'300W':63,'850T':293,'Z500Anom':highanom,'Z850':1554,'SLPAnom':highanom}
         
-        contourstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':5,'850T':250,'Z500Anom':-2.0,'Z850':1140,'SLPAnom':-2.75}
-        contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':5,'850T':2.5,'Z500Anom':0.25,'Z850':30,'SLPAnom':0.25}
+    #     contourstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':5,'850T':250,'Z500Anom':-2.0,'Z850':1140,'SLPAnom':-2.75}
+    #     contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':5,'850T':2.5,'Z500Anom':0.25,'Z850':30,'SLPAnom':0.25}
         
-        cbarstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':0,'850T':250,'Z500Anom':-2.0,'Z850':1150,'SLPAnom':-2.5}
-        cbarint = {'Z500':500,'SLP':5,'IVT':100,'300W':10,'850T':5,'Z500Anom':0.5,'Z850':50,'SLPAnom':0.5}
+    #     cbarstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':0,'850T':250,'Z500Anom':-2.0,'Z850':1150,'SLPAnom':-2.5}
+    #     cbarint = {'Z500':500,'SLP':5,'IVT':100,'300W':10,'850T':5,'Z500Anom':0.5,'Z850':50,'SLPAnom':0.5}
      
-    elif percentile == 90:
-        if metvar == 'Z500Anom':
-            lowanom, highanom = (-2.0, 1.1)
-            newmap = center_colormap(lowanom, highanom, center=0)
-        elif metvar == 'SLPAnom':
-            lowanom, highanom = (-2.4, 0.9)
-            newmap = center_colormap(lowanom, highanom, center=0)
-        elif metvar == '850TAnom':
-            lowanom, highanom = (-1.3, 1.2)
-            newmap = center_colormap(lowanom, highanom, center=0)
-        lowlims = {'Z500':2850,'SLP':985,'IVT':0,'300W':0,'850T':252,'Z500Anom':lowanom,'Z850':1187,'SLPAnom':lowanom,'850TAnom':lowanom}
-        highlims = {'Z500':5700,'SLP':1022,'IVT':736,'300W':56,'850T':293,'Z500Anom':highanom,'Z850':1548,'SLPAnom':highanom,'850TAnom':highanom}
-        
-        contourstart = {'Z500':3000,'SLP':990,'IVT':0,'300W':5,'850T':250,'Z500Anom':-1.75,'Z850':1190,'SLPAnom':-2.25,'850TAnom':-1.2}
-        contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':5,'850T':2.5,'Z500Anom':0.25,'Z850':30,'SLPAnom':0.25,'850TAnom':0.15}
-        
-        cbarstart = {'Z500':3000,'SLP':990,'IVT':0,'300W':0,'850T':250,'Z500Anom':-2.0,'Z850':1200,'SLPAnom':-2.4,'850TAnom':-1.2}
-        cbarint = {'Z500':500,'SLP':5,'IVT':100,'300W':10,'850T':5,'Z500Anom':0.5,'Z850':50,'SLPAnom':0.4,'850TAnom':0.3}
+ #   elif percentile == 90:
+    if metvar == 'Z500Anom':
+        lowanom, highanom = (-2.0, 1.1)
+        newmap = center_colormap(lowanom, highanom, center=0)
+    elif metvar == 'SLPAnom':
+        lowanom, highanom = (-2.4, 0.9)
+        newmap = center_colormap(lowanom, highanom, center=0)
+    else:
+        lowanom, highanom = (-1.3, 1.2)
+        newmap = center_colormap(lowanom, highanom, center=0)
+    lowlims = {'Z500':2850,'SLP':985,'IVT':0,'300W':0,'850T':252,'Z500Anom':lowanom,'Z850':1187,'SLPAnom':lowanom,'850TAnom':lowanom}
+    highlims = {'Z500':5700,'SLP':1022,'IVT':736,'300W':56,'850T':293,'Z500Anom':highanom,'Z850':1548,'SLPAnom':highanom,'850TAnom':highanom}
+    
+    contourstart = {'Z500':3000,'SLP':990,'IVT':0,'300W':5,'850T':250,'Z500Anom':-1.75,'Z850':1190,'SLPAnom':-2.25,'850TAnom':-1.2}
+    contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':5,'850T':2.5,'Z500Anom':0.25,'Z850':30,'SLPAnom':0.25,'850TAnom':0.15}
+    
+    cbarstart = {'Z500':3000,'SLP':990,'IVT':0,'300W':0,'850T':250,'Z500Anom':-2.0,'Z850':1200,'SLPAnom':-2.4,'850TAnom':-1.2}
+    cbarint = {'Z500':500,'SLP':5,'IVT':100,'300W':10,'850T':5,'Z500Anom':0.5,'Z850':50,'SLPAnom':0.4,'850TAnom':0.3}
     
     colormap = {'Z500':'jet','SLP':'rainbow','IVT':'gnuplot2_r','300W':'hot_r','850T':'turbo','Z500Anom':newmap,'Z850':'turbo','SLPAnom':newmap,'850TAnom':newmap}
     cbarlabs = {'Z500':'m','SLP':'hPa','IVT':'kg $\mathregular{m^{-1}}$ $\mathregular{s^{-1}}$','300W':'m/s','850T':'K','Z500Anom':r'$\mathbf{\sigma}$','Z850':'m','SLPAnom':r'$\mathbf{\sigma}$','850TAnom':r'$\mathbf{\sigma}$'}
@@ -243,8 +243,8 @@ for metvar in metvars:
     #%% PLOT NODES from MATLAB
     
     #create subplot for mapping multiple timesteps
-    fig = plt.figure(figsize=(7.5,5.5))
-    fig.suptitle(f'{plottitle[metvar]} Composites',fontsize=13,fontweight="bold",y=0.9875)
+    fig = plt.figure(figsize=(7.2,5))
+    #fig.suptitle(f'{plottitle[metvar]} Composites',fontsize=13,fontweight="bold",y=0.9875)
     
     for i, arr in enumerate(som_composites):
         #MAP DESIRED VARIABLE
@@ -259,7 +259,7 @@ for metvar in metvars:
         ax = fig.add_subplot(3,3,i+1)
         sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
         ax.text(0.0, 1.0, i+1, transform=ax.transAxes + sublabel_loc,
-            fontsize=9, fontweight='bold', verticalalignment='top', 
+            fontsize=10, fontweight='bold', verticalalignment='top', 
             bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
         #create colormap of MERRA2 data
         colorm = map.pcolor(xi,yi,arr,shading='auto',cmap=colormap[metvar],vmin=lowlims[metvar],vmax=highlims[metvar],zorder=1)
@@ -304,12 +304,12 @@ for metvar in metvars:
             
         #add yuba shape
         #map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,linewidth=0.8,color='r')
-        plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
+        plt.scatter(-120.9,39.5,color='w',marker='*',linewidths=0.7,zorder=4)
         
     #CUSTOMIZE SUBPLOT SPACING
-    fig.subplots_adjust(left=0.05,right=0.89,bottom=0.021, top=0.955,hspace=0.05, wspace=0.05) #bottom colorbar
+    fig.subplots_adjust(left=0.045,right=0.895,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
     #fig.add_axis([left,bottom, width,height])
-    cbar_ax = fig.add_axes([0.904,0.05,0.025,0.88]) #bottom colorbar
+    cbar_ax = fig.add_axes([0.905,0.05,0.025,0.9]) #bottom colorbar
     cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='vertical')
     cbar.ax.tick_params(labelsize=8)
     cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
