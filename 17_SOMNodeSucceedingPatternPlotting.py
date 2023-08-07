@@ -153,14 +153,14 @@ for node in np.arange(numpatterns):
     nodedurnorm = 0.9-(((nodedurationaverage-1.13)/0.5))
     nodedur_col = (1,nodedurnorm,1)
     print(nodedur_col)
-    ax.text(x=0.795, y=0.14, s=f'{round(nodedurationaverage,2):.2f}', transform=ax.transAxes + sublabel_loc,
+    ax.text(x=0.805, y=0.14, s=f'{round(nodedurationaverage,2):.2f}', transform=ax.transAxes + sublabel_loc,
         fontsize=8, fontweight='bold', verticalalignment='top', color = 'k',
         bbox=dict(facecolor=nodedur_col, edgecolor='none', pad=1.5),zorder=3)
     # plot number of events
     numevents = len(nodeduration)
     gbcolor = 1.1-(numevents/37)
     patfreq_col = (1,gbcolor,gbcolor)    
-    ax.text(x=0.855, y=0.26, s=numevents, transform=ax.transAxes + sublabel_loc,
+    ax.text(x=0.865, y=0.26, s=numevents, transform=ax.transAxes + sublabel_loc,
         fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
         bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
     # adjust plotting       
