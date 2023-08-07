@@ -27,7 +27,6 @@ mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
 soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}_sompatterns.mat')
 pat_prop = np.squeeze(soms['pat_prop'])
-
 #%% IMPORT EVENT DATA
 data_dir='I:\\Emma\\FIROWatersheds\\Data\\'
 os.chdir(data_dir)
@@ -80,11 +79,12 @@ for node in np.arange(numpatterns):
     nodeduration = []
     precipaccum = []
     avgprecipaccum = []
-    perc_assigned = round(pat_prop[node]*100,1)
+    #perc_assigned = round(pat_prop[node]*100,1)
     ax = fig.add_subplot(3,3,node+1)
     ax.set_zorder(2)
     ax.set_facecolor('none')
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
+    # define color of pattern frequency
     # add node labels
     ax.text(x=0.0, y=1.0, s=node+1, transform=ax.transAxes + sublabel_loc,
         fontsize=10, fontweight='bold', verticalalignment='top',
@@ -153,10 +153,16 @@ for node in np.arange(numpatterns):
     nodedurnorm = 0.9-(((nodedurationaverage-1.13)/0.5))
     nodedur_col = (1,nodedurnorm,1)
     print(nodedur_col)
-    ax.text(x=0.815, y=0.14, s=f'{round(nodedurationaverage,2):.2f}', transform=ax.transAxes + sublabel_loc,
+    ax.text(x=0.795, y=0.14, s=f'{round(nodedurationaverage,2):.2f}', transform=ax.transAxes + sublabel_loc,
         fontsize=8, fontweight='bold', verticalalignment='top', color = 'k',
         bbox=dict(facecolor=nodedur_col, edgecolor='none', pad=1.5),zorder=3)
-
+    # plot number of events
+    numevents = len(nodeduration)
+    gbcolor = 1.1-(numevents/37)
+    patfreq_col = (1,gbcolor,gbcolor)    
+    ax.text(x=0.855, y=0.26, s=numevents, transform=ax.transAxes + sublabel_loc,
+        fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
+        bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
     # adjust plotting       
     ax.set_ylim(0.5, numpatterns+0.8)
     ax.set_xlim(0.5,6.5)
@@ -197,5 +203,5 @@ fig.subplots_adjust(left=0.051,right=0.93,bottom=0.085, top=0.985,hspace=0.05, w
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
 os.chdir(save_dir)
-plt.savefig(f'{percentile}_{numpatterns}_NodeSuccessionbyNodeAccumPrecip.png',dpi=300)
+plt.savefig(f'{percentile}_{numpatterns}_NodeSuccessionbyNodeAccumPrecip_NumEvents.png',dpi=300)
 plt.show()
