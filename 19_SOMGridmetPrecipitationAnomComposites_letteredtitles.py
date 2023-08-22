@@ -25,6 +25,12 @@ os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj
 from mpl_toolkits.basemap import Basemap #installed using 
     #conda install -c anaconda basemap
 #import scipy.io
+from palettable.colorbrewer.diverging import BrBG_10
+from palettable.cmocean.sequential import Tempo_20
+from palettable.cmocean.sequential import Algae_20
+from palettable.colorbrewer.sequential import Greens_9
+from palettable.colorbrewer.sequential import BuGn_9
+from palettable.scientific.sequential import Davos_20_r
 
 #%% DEFINE WATERSHED SHAPEFILE
 watershed = 'UpperYuba'
@@ -185,7 +191,8 @@ fig.suptitle('b)',fontsize=11,fontweight="bold",y=0.997,x=0.07)
 
 lowlim = 3.3
 highlim = 18.4
-colormap = 'gist_ncar_r'
+#colormap = 'gist_ncar_r'
+colormap = BrBG_10.mpl_colormap
 
 for i, arr in enumerate(som_composites):
     #MAP DESIRED VARIABLE
@@ -200,7 +207,7 @@ for i, arr in enumerate(som_composites):
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     ax.text(0.0, 1.0, i+1, transform=ax.transAxes + sublabel_loc,
         fontsize=10, fontweight='bold', verticalalignment='top', 
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
+        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=5)
     #create colormap of MERRA2 data
     colorm = map.pcolor(xi,yi,arr,shading='auto',cmap=colormap,vmin=lowlim,vmax=highlim,zorder=1)
     
@@ -208,24 +215,24 @@ for i, arr in enumerate(som_composites):
     border_c = '0.4'
     border_w = 0.4
     #create map features
-    map.drawcoastlines(color=border_c, linewidth=border_w)
-    map.drawstates(color=border_c, linewidth=border_w)
-    map.drawcountries(color=border_c, linewidth=border_w)
+    map.drawcoastlines(color=border_c, linewidth=border_w,zorder=2)
+    map.drawstates(color=border_c, linewidth=border_w,zorder=2)
+    map.drawcountries(color=border_c, linewidth=border_w,zorder=2)
     gridlinefont = 8.5
     parallels = np.arange(38.,42.,1.)
     meridians = np.arange(-124.,-119.,2.)
     if i == 0 or i == 3:
-        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-        map.drawmeridians(meridians,color=border_c,linewidth=border_w)
+        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w,zorder=3)
+        map.drawmeridians(meridians,color=border_c,linewidth=border_w,zorder=3)
     elif i == 7 or i == 8:
-        map.drawparallels(parallels, color=border_c,linewidth=border_w)
-        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+        map.drawparallels(parallels, color=border_c,linewidth=border_w,zorder=3)
+        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w,zorder=3)
     elif i == 6:
-        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w,zorder=3)
+        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w,zorder=3)
     else:
-        map.drawparallels(parallels, color=border_c,linewidth=border_w)
-        map.drawmeridians(meridians,color=border_c,linewidth=border_w)
+        map.drawparallels(parallels, color=border_c,linewidth=border_w,zorder=3)
+        map.drawmeridians(meridians,color=border_c,linewidth=border_w,zorder=3)
     #define contour color and thickness
     contour_c = '0.1'
     contour_w = 0.7
@@ -239,7 +246,7 @@ for i, arr in enumerate(som_composites):
         skip = (slice(None, None, interval), slice(None, None, interval))
         xim, yim = map(lonm,latm)
         #vectorm = map.quiver(xi2[skip],yi2[skip],U_arrs[skip],V_arrs[skip],color='darkgreen')
-        vectorm = map.quiver(xim[skip],yim[skip],U_arrs[skip],V_arrs[skip],pivot='mid', \
+        vectorm = map.quiver(xim[skip],yim[skip],U_arrs[skip],V_arrs[skip],pivot='mid',zorder=4, \
                              scale=size, scale_units='inches',headlength=5,headwidth=3,color='b',width=0.007,alpha=0.7)
 
     #create contour map
@@ -247,7 +254,7 @@ for i, arr in enumerate(som_composites):
     #plt.clabel(contourm,levels=contourm.levels[::2],fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
         
     #add yuba shape
-    map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed)
+    map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,zorder=3)
     #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
     
 #CUSTOMIZE SUBPLOT SPACING

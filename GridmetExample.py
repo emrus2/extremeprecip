@@ -15,7 +15,7 @@ import netCDF4 as nc # needs to be installed before importing
 import numpy as np
 
 # define filepath
-year = '1980'
+year = '2022'
 filepath = f'I:\\GRIDMET\\pr\\pr_{year}.nc'
 
 # open file using netCDF4 package
@@ -55,10 +55,10 @@ lonind = np.where(lonlims)[0]
 lonreduced = gridlon[lonind]
 #reduce pressure
 precipreduced = precip[:,latind,:]
-precipreduced = precipreduced[:,:,lonind]
+precipreduced = precipreduced[:,:,lonind] # now this is reduced to the lat/lon
 
 # or calculate the average precipitation across the region
-
+precipreducedavg = np.mean(precipreduced)
 
 #%%
 #IMPORT MODULES
