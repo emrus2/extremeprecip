@@ -25,6 +25,7 @@ os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj
 from mpl_toolkits.basemap import Basemap #installed using 
     #conda install -c anaconda basemap
 #import scipy.io
+bigarrows = True
 
 #%% DEFINE WATERSHED SHAPEFILE
 watershed = 'UpperYuba'
@@ -140,18 +141,22 @@ if metvar == 'wind':
         # create array to store assigned days data
         som_merra = np.zeros((1,len(latreduced),len(lonreduced)))
         # loop through all days
-        for day,arr in enumerate(merrareduced):
+        for day,arr in enumerate(winddir):
             #print(np.amax(arr))
             # add data to som_merra if day is assigned to node
             if assignment[day] == float(som + 1):
                 som_merra = np.ma.concatenate((som_merra,np.expand_dims(arr,axis=0)))
-                print(np.amax(som_merra))
+                print(np.amin(som_merra),np.amax(som_merra))
         # remove initial row of zeros
         som_merra = som_merra[1:,:,:]
         # calculate the mean of assigned days
         som_mean = np.squeeze(np.mean(som_merra,axis=0))
         # append to array of composites
         som_composites_winddir[som] = som_mean
+    
+    #convert zeroes to NaNs
+    #som_composites_winddir[som_composites_winddir == 0] = 'nan'
+    #print(np.nanmin(som_composites_winddir),np.nanmax(som_composites_winddir))
     
     winddir_radians = np.radians(270 - som_composites_winddir)
     Uwind = som_composites*np.cos(winddir_radians)
@@ -177,8 +182,8 @@ print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
 #%% PLOT NODES from MATLAB
 
 #create subplot for mapping multiple timesteps
-fig = plt.figure(figsize=(7.5,5.5))
-fig.suptitle(f'{plottitles[metvar]} Composites',fontsize=13,fontweight="bold",y=0.9875)
+fig = plt.figure(figsize=(7.2,5))
+#fig.suptitle(f'{plottitles[metvar]} Composites',fontsize=13,fontweight="bold",y=0.9875)
 
 for i, arr in enumerate(som_composites):
     Uarr = Uwind[i,:,:]
@@ -195,7 +200,7 @@ for i, arr in enumerate(som_composites):
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     ax.text(0.0, 1.0, i+1, transform=ax.transAxes + sublabel_loc,
         fontsize=9, fontweight='bold', verticalalignment='top', 
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
+        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=5)
     #create colormap of MERRA2 data
     colorm = map.pcolor(xi,yi,arr,shading='auto',cmap=colormap[metvar],vmin=lowlims[metvar],vmax=highlims[metvar],zorder=1)
     
@@ -203,37 +208,44 @@ for i, arr in enumerate(som_composites):
     border_c = '0.4'
     border_w = 0.4
     #create map features
-    map.drawcoastlines(color=border_c, linewidth=border_w)
-    map.drawstates(color=border_c, linewidth=border_w)
-    map.drawcountries(color=border_c, linewidth=border_w)
+    map.drawcoastlines(color=border_c, linewidth=border_w,zorder=2)
+    map.drawstates(color=border_c, linewidth=border_w,zorder=2)
+    map.drawcountries(color=border_c, linewidth=border_w,zorder=2)
     gridlinefont = 8.5
     parallels = np.arange(38.,42.,1.)
     meridians = np.arange(-124.,-119.,2.)
     if i == 0 or i == 3:
-        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-        map.drawmeridians(meridians,color=border_c,linewidth=border_w)
+        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w,zorder=2)
+        map.drawmeridians(meridians,color=border_c,linewidth=border_w,zorder=2)
     elif i == 7 or i == 8:
-        map.drawparallels(parallels, color=border_c,linewidth=border_w)
-        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+        map.drawparallels(parallels, color=border_c,linewidth=border_w,zorder=2)
+        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w,zorder=2)
     elif i == 6:
-        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w,zorder=2)
+        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w,zorder=2)
     else:
-        map.drawparallels(parallels, color=border_c,linewidth=border_w)
-        map.drawmeridians(meridians,color=border_c,linewidth=border_w)
+        map.drawparallels(parallels, color=border_c,linewidth=border_w,zorder=2)
+        map.drawmeridians(meridians,color=border_c,linewidth=border_w,zorder=2)
     #define contour color and thickness
     #contour_c = '0.1'
     contour_c = 'b'
     contour_w = 0.7
     #create contour map
     if metvar == 'wind':
-        interval = 5
-        size = 1500
-        skip = (slice(None, None, interval), slice(None, None, interval))
-        #vectorm = map.quiver(xi2[skip],yi2[skip],U_arrs[skip],V_arrs[skip],color='darkgreen')
-        vectorm = map.quiver(xi[skip],yi[skip],Uarr[skip],Varr[skip],pivot='mid',color='k')
+        if bigarrows == True:
+            interval = 8
+            size = 1000
+            skip = (slice(None, None, interval), slice(None, None, interval))
+            #vectorm = map.quiver(xi2[skip],yi2[skip],U_arrs[skip],V_arrs[skip],color='darkgreen')
+            vectorm = map.quiver(xi[skip],yi[skip],Uarr[skip],Varr[skip],pivot='mid',color='b',zorder=4)
+        else:
+            interval = 5
+            size = 1500
+            skip = (slice(None, None, interval), slice(None, None, interval))
+            #vectorm = map.quiver(xi2[skip],yi2[skip],U_arrs[skip],V_arrs[skip],color='darkgreen')
+            vectorm = map.quiver(xi[skip],yi[skip],Uarr[skip],Varr[skip],pivot='mid',color='b',zorder=4)
     if metvar == 'mintemp':
-        contourm = map.contour(xi,yi,arr,colors=contour_c,linewidths=contour_w,levels=np.arange(0,1,1),zorder=2)
+        contourm = map.contour(xi,yi,arr,colors=contour_c,linewidths=contour_w,levels=np.arange(0,1,1),zorder=4)
     #plt.clabel(contourm,levels=contourm.levels[::2],fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
         
     #add yuba shape
@@ -241,9 +253,9 @@ for i, arr in enumerate(som_composites):
     #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
     
 #CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.05,right=0.89,bottom=0.021, top=0.955,hspace=0.05, wspace=0.05) #bottom colorbar
+fig.subplots_adjust(left=0.05,right=0.9,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
 #fig.add_axis([left,bottom, width,height])
-cbar_ax = fig.add_axes([0.904,0.05,0.025,0.88]) #bottom colorbar
+cbar_ax = fig.add_axes([0.91,0.05,0.025,0.9]) #bottom colorbar
 cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='vertical')
 cbar.ax.tick_params(labelsize=8)
 cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
@@ -252,5 +264,8 @@ cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
 os.chdir(save_dir)
-plt.savefig(f'GRIMET_{metvar}_SOM_composite.png',dpi=300)
+if metvar == 'wind' and bigarrows == True:
+    plt.savefig(f'GRIMET_{metvar}_SOM_composite_biggerarrows.png',dpi=300)
+else:
+    plt.savefig(f'GRIMET_{metvar}_SOM_composite',dpi=300)
 plt.show()
