@@ -26,11 +26,11 @@ from mpl_toolkits.basemap import Basemap #installed using
     #conda install -c anaconda basemap
 #import scipy.io
 from palettable.colorbrewer.diverging import BrBG_10
-from palettable.cmocean.sequential import Tempo_20
-from palettable.cmocean.sequential import Algae_20
-from palettable.colorbrewer.sequential import Greens_9
-from palettable.colorbrewer.sequential import BuGn_9
-from palettable.scientific.sequential import Davos_20_r
+# from palettable.cmocean.sequential import Tempo_20
+# from palettable.cmocean.sequential import Algae_20
+# from palettable.colorbrewer.sequential import Greens_9
+# from palettable.colorbrewer.sequential import BuGn_9
+# from palettable.scientific.sequential import Davos_20_r
 
 #%% DEFINE WATERSHED SHAPEFILE
 watershed = 'UpperYuba'

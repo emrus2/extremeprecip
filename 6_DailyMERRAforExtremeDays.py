@@ -56,20 +56,23 @@ for n in range(precip.shape[0]):
         extremedates.append(datestr[n])
         precipvalues.append(precip[n])
         
-np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDays.npy',np.array(extremedates))
-np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDaysPrecip.npy',np.array(precipvalues))
+#np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDays.npy',np.array(extremedates))
+#np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDaysPrecip.npy',np.array(precipvalues))
 
         #should be equal to 130 for 95th, 260 for 90th
 #remove extreme days in summer (keep OCT-MAR)
 extremestr = [date for date in extremedates if int(date[5]) not in range(4,10)]
-    #should be equal to 162
+    #should be equal to 260
 
 #%% DEFINE EXTREME MERRA2 FILES
 #define files of interest
 #metvar = input('Enter MERRA-2 Variable: Z500, SLP, 300W, 850T, Z850 or IVT \n')
-metvars = ['Z500', 'SLP', '300W', '850T', 'Z850']#,'IVT']
+#metvars = ['Z500', 'SLP', '300W', '850T', 'Z850','IVT','850W']
+metvars = ['850W']
 for metvar in metvars:
-    metpath = {'Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressure_3hourly','IVT':'IVT_daily','300W':'East_and_North_wind_components_at_300_hPa','850T':'Temperature_at_850_hPa_3hourly','Z850':'850_hPa_Geopotential_Height_3hourly'}
+    metpath = {'Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressure_3hourly','IVT':'IVT_daily', \
+               '300W':'East_and_North_wind_components_at_300_hPa','850T':'Temperature_at_850_hPa_3hourly', \
+                   'Z850':'850_hPa_Geopotential_Height_3hourly','850W':'East_and_North_wind_components_at_850_hPa'}
     folderpath = f'I:\\MERRA2\\Daily_and_Subdaily\\{metpath[metvar]}'
     
     extremefiles = []
@@ -79,7 +82,7 @@ for metvar in metvars:
     if metvar == 'IVT':
         files = glob.glob(os.path.join(folderpath,"MERRA2.tavg1_2d_int_Nx.1*")) + glob.glob(os.path.join(folderpath,'MERRA2.tavg1_2d_int_Nx.200*')) + glob.glob(os.path.join(folderpath,'MERRA2.tavg1_2d_int_Nx.201[0-6]*'))
         files2 = glob.glob(os.path.join(folderpath,'MERRA2.tavg1_2d_int_Nx.201[7-9]*')) + glob.glob(os.path.join(folderpath,'MERRA2.tavg1_2d_int_Nx.202[0-1]*'))
-    elif metvar == '850T':
+    elif metvar == '850T' or metvar == '850W':
         files = glob.glob(os.path.join(folderpath,"MERRA2*.inst3_3d_asm_Np.1*.SUB.nc")) + glob.glob(os.path.join(folderpath,'MERRA2*.inst3_3d_asm_Np.20[0-1]*.SUB.nc')) + glob.glob(os.path.join(folderpath,'MERRA2*.inst3_3d_asm_Np.202[0-1]*.SUB.nc'))
     elif metvar == 'Z850':
         files = glob.glob(os.path.join(folderpath,"MERRA2.inst3_3d_asm_Np.1*.SUB.nc")) + glob.glob(os.path.join(folderpath,'MERRA2.inst3_3d_asm_Np.20[0-1]*.SUB.nc')) + glob.glob(os.path.join(folderpath,'MERRA2.inst3_3d_asm_Np.202[0-1]*.SUB.nc')) + glob.glob(os.path.join(folderpath,'MERRA2*.inst3_3d_asm_Np.202109*.SUB.nc'))
@@ -92,7 +95,7 @@ for metvar in metvars:
         #add extreme files to list
         if (any(date in file for date in extremestr)):
             extremefiles.append(file)
-            #extremefiles should be 130 in length (112 for IVT)
+            #extremefiles should be 130 in length (112 for IVT), 260 for 90th percentile
     if metvar == 'IVT':
         for file in files2:
             if (any(date in file for date in extremestr)):
@@ -110,7 +113,7 @@ for metvar in metvars:
         ds = xr.open_mfdataset(extremefiles, combine='nested',concat_dim='time')
         #calculate daily average merra data
         ds = ds.groupby('time.date').mean() #this works great!!
-        ds.squeeze() #should result in 162 dates
+        ds.squeeze() #should result in 162(260) dates
         ds['date'] = ds['date'].astype('datetime64')
         
     print(ds)
