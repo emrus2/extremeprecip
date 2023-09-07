@@ -47,7 +47,7 @@ lonmin, lonmax = (-170.25,-105.75)
 #%% IMPORT MERRA2 DATA
 # define metvar
 metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850T','850TAnom']
-metvars = ['SLP','Z850']
+metvars = ['IVT']
 #metvar = '300W'
 for metvar in metvars:
     #define composite location
@@ -61,6 +61,9 @@ for metvar in metvars:
     elif metvar == '850TAnom':
         folderpath = 'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\850T'
         filename = f'MERRA2_850T_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
+    # elif metvar == 'IVT'
+    #     folderpath = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}'
+    #     filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
     else:
         folderpath = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}'
         filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
@@ -144,29 +147,29 @@ for metvar in metvars:
             # append to array of composites
             U_composites[som] = U_mean
             V_composites[som] = V_mean
-
+        som_composites = np.sqrt(U_composites**2 + V_composites**2)
     #%% CLUSTER ASSIGNED PATTERNS AND CALCULATE AVERAGE
-    
-    # create array to store 12 SOM composites
-    som_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
-    
-    # loop through all 12 som patterns
-    for som in range(len(patterns[:,0])):
-        # create array to store assigned days data
-        som_merra = np.zeros((1,len(gridlatreduced),len(gridlonreduced)))
-        # loop through all days
-        for day,arr in enumerate(merrareduced):
-            # add data to som_merra if day is assigned to node
-            if assignment[day] == som + 1:
-                som_merra = np.concatenate((som_merra,np.expand_dims(arr,axis=0)))
-        # remove initial row of zeros
-        som_merra = som_merra[1:,:,:]
-        # confirm correct number of days assigned to node
-        #print(som+1,len(som_merra),pat_freq[som])
-        # calculate the mean of assigned days
-        som_mean = np.squeeze(np.mean(som_merra,axis=0))
-        # append to array of composites
-        som_composites[som] = som_mean
+    else:
+        # create array to store 12 SOM composites
+        som_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
+        
+        # loop through all 12 som patterns
+        for som in range(len(patterns[:,0])):
+            # create array to store assigned days data
+            som_merra = np.zeros((1,len(gridlatreduced),len(gridlonreduced)))
+            # loop through all days
+            for day,arr in enumerate(merrareduced):
+                # add data to som_merra if day is assigned to node
+                if assignment[day] == som + 1:
+                    som_merra = np.concatenate((som_merra,np.expand_dims(arr,axis=0)))
+            # remove initial row of zeros
+            som_merra = som_merra[1:,:,:]
+            # confirm correct number of days assigned to node
+            #print(som+1,len(som_merra),pat_freq[som])
+            # calculate the mean of assigned days
+            som_mean = np.squeeze(np.mean(som_merra,axis=0))
+            # append to array of composites
+            som_composites[som] = som_mean
     
     #%% DETERMINE MAX AND MIN VALIUES
     zmax = 0
@@ -183,7 +186,7 @@ for metvar in metvars:
         if lowlim < zmin:
             zmin = lowlim
     
-    #print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
+    print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
     
     #%% CREATE ANOMALY MAP 
     #GENERATE CUSTOM COLORMAP
@@ -318,5 +321,5 @@ for metvar in metvars:
     #SHOW MAP
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
     os.chdir(save_dir)
-    plt.savefig(f'{metvar}_{percentile}_{numpatterns}_SOM_composite.png',dpi=300)
+    plt.savefig(f'{metvar}_{percentile}_{numpatterns}_SOM_composite_1.png',dpi=300)
     plt.show()

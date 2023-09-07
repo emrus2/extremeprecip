@@ -24,14 +24,16 @@ os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj
 from mpl_toolkits.basemap import Basemap #installed using 
     #conda install -c anaconda basemap
 import scipy.io
+from datetime import datetime, timedelta
 #%% IMPORT SOM DATA
 # change directory and import SOM data from .mat file
-mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
+mat_dir='I:\\Emma\\FIROWatersheds\\Data'
+os.chdir(mat_dir)
 numpatterns = 9
 percentile = 90
 
 os.chdir(mat_dir)
-soms = scipy.io.loadmat(f'IVT_{percentile}_{numpatterns}_sompatterns.mat')
+soms = scipy.io.loadmat(f'SOMs\\SomOutput\\IVT_{percentile}_{numpatterns}_sompatterns.mat')
 gridlat = np.squeeze(soms['lat'])
 gridlon = np.squeeze(soms['lon'])
 patterns = soms['pats']
@@ -40,6 +42,8 @@ pat_prop = np.squeeze(soms['pat_prop'])
 asn_err = np.squeeze(soms['assignment'])
 assignment = asn_err[:,0]
 
+extremeassign = np.load('90Percentile_ExtremeDaysand9NodeAssign.npy')
+
 # define lat, lon region of data for plotting
 latmin, latmax = (15.5,65.5)
 lonmin, lonmax = (-170.25,-105.75)
@@ -47,7 +51,7 @@ lonmin, lonmax = (-170.25,-105.75)
 #%% IMPORT MERRA2 DATA
 # define metvar
 metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850T','850TAnom']
-metvars = ['SLP','Z850']
+metvars = ['IVT']
 #metvar = '300W'
 for metvar in metvars:
     #define composite location
@@ -61,6 +65,9 @@ for metvar in metvars:
     elif metvar == '850TAnom':
         folderpath = 'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\850T'
         filename = f'MERRA2_850T_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
+    elif metvar == 'IVT':
+        folderpath = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}'
+        filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
     else:
         folderpath = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}'
         filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
@@ -74,6 +81,8 @@ for metvar in metvars:
     print(gridfile)
     gridlat = gridfile.variables['lat'][:]
     gridlon = gridfile.variables['lon'][:]
+    time = gridfile.variables['time'][:]
+    date = [datetime.strptime('198001090030','%Y%m%d%H%M') + timedelta(minutes = t) for t in time]
     if metvar == 'IVT':
         Uvapor = gridfile.variables['UFLXQV'][:]
         Vvapor = gridfile.variables['VFLXQV'][:]
@@ -111,63 +120,37 @@ for metvar in metvars:
     #print(np.amin(merrareduced),np.amax(merrareduced))
     
 #%% INCLUDE CALCULATION OF IVT VECTORS
+
+    U_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
+    V_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
+
     if metvar == 'IVT':
         Uvaporreduced = Uvapor[:,latind,:]
         Uvaporreduced = Uvaporreduced[:,:,lonind]
         Vvaporreduced = Vvapor[:,latind,:]
         Vvaporreduced = Vvaporreduced[:,:,lonind]
         
-        # create array to store 12 SOM composites
-        U_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
-        V_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
-        # loop through all 12 som patterns
+        # loop through som patterns and calculate average
         for som in range(len(patterns[:,0])):
-            # create array to store assigned days data
-            U_merra = np.zeros((1,len(gridlatreduced),len(gridlonreduced)))
-            V_merra = np.zeros((1,len(gridlatreduced),len(gridlonreduced)))
-            # loop through all days
-            for day,arr in enumerate(merrareduced):
-                U_array = Uvaporreduced[day,:,:]
-                V_array = Vvaporreduced[day,:,:]
-                # add data to som_merra if day is assigned to node
-                if assignment[day] == som + 1:
-                    U_merra = np.concatenate((U_merra,np.expand_dims(U_array,axis=0)))
-                    V_merra = np.concatenate((V_merra,np.expand_dims(V_array,axis=0)))
-            # remove initial row of zeros
-            U_merra = U_merra[1:,:,:]
-            V_merra = V_merra[1:,:,:]
-            # confirm correct number of days assigned to node
-            #print(som+1,len(U_merra),pat_freq[som])
-            # calculate the mean of assigned days
-            U_mean = np.squeeze(np.mean(U_merra,axis=0))
-            V_mean = np.squeeze(np.mean(V_merra,axis=0))
-            # append to array of composites
-            U_composites[som] = U_mean
-            V_composites[som] = V_mean
-
+            UvaporNode = [arr for i,arr in enumerate(Uvaporreduced) if assignment[i] == int(som + 1)]
+            UvaporMean = np.squeeze(np.mean(UvaporNode,axis=0))
+            U_composites[som]= UvaporMean
+            
+            VvaporNode = [arr for i,arr in enumerate(Vvaporreduced) if assignment[i] == int(som + 1)]
+            VvaporMean = np.squeeze(np.mean(VvaporNode,axis=0))
+            V_composites[som]= VvaporMean
+        
+        som_composites = np.sqrt(U_composites**2 + V_composites**2)
     #%% CLUSTER ASSIGNED PATTERNS AND CALCULATE AVERAGE
-    
-    # create array to store 12 SOM composites
-    som_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
-    
-    # loop through all 12 som patterns
-    for som in range(len(patterns[:,0])):
-        # create array to store assigned days data
-        som_merra = np.zeros((1,len(gridlatreduced),len(gridlonreduced)))
-        # loop through all days
-        for day,arr in enumerate(merrareduced):
-            # add data to som_merra if day is assigned to node
-            if assignment[day] == som + 1:
-                som_merra = np.concatenate((som_merra,np.expand_dims(arr,axis=0)))
-        # remove initial row of zeros
-        som_merra = som_merra[1:,:,:]
-        # confirm correct number of days assigned to node
-        #print(som+1,len(som_merra),pat_freq[som])
-        # calculate the mean of assigned days
-        som_mean = np.squeeze(np.mean(som_merra,axis=0))
-        # append to array of composites
-        som_composites[som] = som_mean
-    
+    else:
+        # create array to store 12 SOM composites
+        som_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
+        
+        for som in range(len(patterns[:,0])):
+            MerraNode = [arr for i,arr in enumerate(merrareduced) if assignment[i] == int(som + 1)]
+            MerraMean = np.squeeze(np.mean(MerraNode,axis=0))
+            som_composites[som]= MerraMean
+            
     #%% DETERMINE MAX AND MIN VALIUES
     zmax = 0
     zmin = 1E8
@@ -183,7 +166,7 @@ for metvar in metvars:
         if lowlim < zmin:
             zmin = lowlim
     
-    #print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
+    print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
     
     #%% CREATE ANOMALY MAP 
     #GENERATE CUSTOM COLORMAP
@@ -198,27 +181,6 @@ for metvar in metvars:
         return newmap
     
     #%% DEFINE PLOTTING VARIABLES
-    # if percentile == 95:
-    #     if metvar == 'Z500Anom':
-    #         lowanom, highanom = (-2.2, 1.4)
-    #         newmap = center_colormap(lowanom, highanom, center=0)
-    #     elif metvar == 'SLPAnom':
-    #         lowanom, highanom = (-2.8, 1.0)
-    #         newmap = center_colormap(lowanom, highanom, center=0)
-    #     else:
-    #         lowanom, highanom = (-1.3, 1.2)
-    #         newmap = center_colormap(lowanom, highanom, center=0)
-    # #create subplot for mapping multiple timesteps
-    #     lowlims = {'Z500':2850,'SLP':978,'IVT':0,'300W':0,'850T':248,'Z500Anom':lowanom,'Z850':1138,'SLPAnom':lowanom}
-    #     highlims = {'Z500':5700,'SLP':1025,'IVT':800,'300W':63,'850T':293,'Z500Anom':highanom,'Z850':1554,'SLPAnom':highanom}
-        
-    #     contourstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':5,'850T':250,'Z500Anom':-2.0,'Z850':1140,'SLPAnom':-2.75}
-    #     contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':5,'850T':2.5,'Z500Anom':0.25,'Z850':30,'SLPAnom':0.25}
-        
-    #     cbarstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':0,'850T':250,'Z500Anom':-2.0,'Z850':1150,'SLPAnom':-2.5}
-    #     cbarint = {'Z500':500,'SLP':5,'IVT':100,'300W':10,'850T':5,'Z500Anom':0.5,'Z850':50,'SLPAnom':0.5}
-     
- #   elif percentile == 90:
     if metvar == 'Z500Anom':
         lowanom, highanom = (-2.0, 1.1)
         newmap = center_colormap(lowanom, highanom, center=0)
@@ -229,7 +191,7 @@ for metvar in metvars:
         lowanom, highanom = (-1.3, 1.2)
         newmap = center_colormap(lowanom, highanom, center=0)
     lowlims = {'Z500':2850,'SLP':985,'IVT':0,'300W':0,'850T':252,'Z500Anom':lowanom,'Z850':1187,'SLPAnom':lowanom,'850TAnom':lowanom}
-    highlims = {'Z500':5700,'SLP':1022,'IVT':736,'300W':56,'850T':293,'Z500Anom':highanom,'Z850':1548,'SLPAnom':highanom,'850TAnom':highanom}
+    highlims = {'Z500':5700,'SLP':1022,'IVT':562,'300W':56,'850T':293,'Z500Anom':highanom,'Z850':1548,'SLPAnom':highanom,'850TAnom':highanom}
     
     contourstart = {'Z500':3000,'SLP':990,'IVT':0,'300W':5,'850T':250,'Z500Anom':-1.75,'Z850':1190,'SLPAnom':-2.25,'850TAnom':-1.2}
     contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':5,'850T':2.5,'Z500Anom':0.25,'Z850':30,'SLPAnom':0.25,'850TAnom':0.15}
@@ -318,5 +280,5 @@ for metvar in metvars:
     #SHOW MAP
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
     os.chdir(save_dir)
-    plt.savefig(f'{metvar}_{percentile}_{numpatterns}_SOM_composite.png',dpi=300)
+    plt.savefig(f'{metvar}_{percentile}_{numpatterns}_SOM_composite_1.png',dpi=300)
     plt.show()
