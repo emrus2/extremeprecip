@@ -69,7 +69,7 @@ for n in range(precip.shape[0]):
 
 #%% DEFINE EXTREME MERRA2 FILES
 #define files of interest
-metvars = ['IVT']
+metvars = ['Z850']
 metpath = {'Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressure_3hourly','IVT':'IVT_daily', \
                '300W':'East_and_North_wind_components_at_300_hPa','850T':'Temperature_at_850_hPa_3hourly', \
                    'Z850':'850_hPa_Geopotential_Height_3hourly','850W':'East_and_North_wind_components_at_850_hPa'}
@@ -79,7 +79,9 @@ for metvar in metvars:
     os.chdir(folderpath)
     extremefiles = [file for file in os.listdir(folderpath) if any(date in file for date in extremedates)]
     # sort extremefiles in case it is out of order
+    print(extremefiles)
     extremefiles.sort() # works for IVT
+    extremefiles = [string for string in extremefiles if '.nc.1' not in string]
 
             
     #%% CREATE EXTREMES DATASET

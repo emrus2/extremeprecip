@@ -24,7 +24,7 @@ merravar = {'Z500':'H','SLP':'SLP','850T':'T'}
 percentile = 90
 
 folderpath = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}'
-filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
+filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
 filepath = os.path.join(folderpath,filename)
 
 #COLLECT VARIABLE DATA FROM MERRA2 FILE
@@ -47,4 +47,4 @@ merra = merraanom / climstd
 
 merra = np.array(merra)
 os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}')
-np.save(f'MERRA2_{metvar}Anom_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST',merra)
+np.save(f'MERRA2_{metvar}Anom_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated',merra)

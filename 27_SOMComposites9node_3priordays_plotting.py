@@ -15,7 +15,7 @@ import netCDF4 as nc
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import matplotlib.transforms as mtransforms
+#import matplotlib.transforms as mtransforms
 from matplotlib.colors import ListedColormap
 from mpl_toolkits.basemap import Basemap 
 import os
@@ -23,26 +23,38 @@ import os
 #%% DEFINE VARIABLES
 # define som pattern for plotting and met vars
 sompattern = 1
-metvars = ['IVT']
-merravar = {'Z500':'H','SLP':'SLP','850T':'T','Z850':'H','IVT':'IVTmag'}
+#metvars = ['IVT','300W','Z500','SLP','SLPAnom]
+metvars = ['IVT','300W','Z500Anom','850W','850TAnom','SLP']
+#metvars = ['850W']
+merravar = {'Z500':'H','Z500Anom':'H','SLP':'SLP','SLPAnom':'SLP','850T':'T', \
+            '850TAnom':'T','Z850':'H','IVT':'IVTmag','300W':'Windmag', \
+                '850W':'Windmag'}
 folderpath = (f'I:\\Emma\\FIROWatersheds\\Data\\SOMPreviousDaysComposites\\SOM{sompattern}')
 
 # define lon, lat bounds for plotting
 latmin, latmax = (15.5,65.5)
 lonmin, lonmax = (-170.25,-105.75)
 
+# define colorbar axes
+axwidth = 0.02
+axheight = 0.15
+ax_y = 0.905
+
 #%% LOOP THROUGH AND PLOT FIGURES
-fig = plt.figure(figsize=(7.2,5))
+fig = plt.figure(figsize=(7.2,7.5))
 i = 0
 for metvar in metvars:
     for dayprev in range(3,-1,-1):
-        filename = f'Node{sompattern}_{dayprev}dayprior_composite{metvar}.nc'
-        filepath = os.path.join(folderpath,filename)  
-    
+        if 'Anom' in metvar:
+            red_metvar = metvar[:-4]
+            filename = f'Node{sompattern}_{dayprev}dayprior_composite{red_metvar}.nc'
+        else:
+            filename = f'Node{sompattern}_{dayprev}dayprior_composite{metvar}.nc'
+        filepath = os.path.join(folderpath,filename) 
         #COLLECT VARIABLE DATA FROM MERRA2 FILE
         #open the netcdf file in read mode
         gridfile = nc.Dataset(filepath,mode='r')
-        print(gridfile)
+        #print(gridfile)
         gridlat = gridfile.variables['lat'][:]
         gridlon = gridfile.variables['lon'][:]
         merra = gridfile.variables[merravar[metvar]][:]
@@ -52,7 +64,17 @@ for metvar in metvars:
         # convert slp to hPa
         if metvar == 'SLP':
             merra = merra/100
-        
+            
+        # calculate anomalies
+        if 'Anom' in metvar:
+            gridfile_mean = nc.Dataset(f'I:\\Emma\\FIROWatersheds\\Data\\WinterClimatologies\\{red_metvar}_Climatology_1980-2021_OCT-MAR.nc',mode='r')
+            climmean = gridfile_mean.variables[merravar[metvar]][:]
+            gridfile_mean.close()
+            gridfile_std = nc.Dataset(f'I:\\Emma\\FIROWatersheds\\Data\\WinterClimatologies\\{red_metvar}_Climatology_Std_1980-2021_OCT-MAR.nc',mode='r')
+            climstd = gridfile_mean.variables[merravar[metvar]][:]
+            gridfile_std.close()
+            merraanom = merra - climmean
+            merra = merraanom / climstd
         #%% REDUCE LAT AND LON TO DESIRED AREA
         #reduce lat
         latlims = np.logical_and(gridlat > latmin, gridlat < latmax)
@@ -66,7 +88,7 @@ for metvar in metvars:
         merrareduced = merra[latind,:]
         merrareduced = merrareduced[:,lonind]
         
-        print(np.amin(merrareduced),np.amax(merrareduced))
+        #print(np.amin(merrareduced),np.amax(merrareduced))
         
         #%% DETERMINE MAX AND MIN VALIUES
         # zmax = 0
@@ -107,18 +129,35 @@ for metvar in metvars:
         else:
             lowanom, highanom = (-1.3, 1.2)
             newmap = center_colormap(lowanom, highanom, center=0)
-        lowlims = {'Z500':5200,'SLP':985,'IVT':0,'300W':0,'850T':252,'Z500Anom':lowanom,'Z850':1187,'SLPAnom':lowanom,'850TAnom':lowanom}
-        highlims = {'Z500':5860,'SLP':1022,'IVT':736,'300W':56,'850T':293,'Z500Anom':highanom,'Z850':1548,'SLPAnom':highanom,'850TAnom':highanom}
+        lowlims = {'SLP':985,'IVT':0,'300W':0,'850T':252,'Z500Anom':lowanom, \
+                   'Z850':1187,'SLPAnom':lowanom,'850TAnom':lowanom, \
+                       '850W':0}
+        highlims = {'SLP':1022,'IVT':562,'300W':56,'850T':293,'Z500Anom':highanom,\
+                    'Z850':1548,'SLPAnom':highanom,'850TAnom':highanom, \
+                        '850W':18}
         
-        contourstart = {'Z500':3000,'SLP':990,'IVT':0,'300W':5,'850T':250,'Z500Anom':-1.75,'Z850':1190,'SLPAnom':-2.25,'850TAnom':-1.2}
-        contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':5,'850T':2.5,'Z500Anom':0.25,'Z850':30,'SLPAnom':0.25,'850TAnom':0.15}
+        contourstart = {'SLP':990,'IVT':0,'300W':5,'850T':250,'Z500Anom':-1.75, \
+                        'Z850':1190,'SLPAnom':-2.25,'850TAnom':-1.2,'850W':2}
+        contourint = {'SLP':4,'IVT':75,'300W':5,'850T':2.5,'Z500Anom':0.25, \
+                      'Z850':30,'SLPAnom':0.25,'850TAnom':0.15,'850W':2}
         
-        cbarstart = {'Z500':3000,'SLP':990,'IVT':0,'300W':0,'850T':250,'Z500Anom':-2.0,'Z850':1200,'SLPAnom':-2.4,'850TAnom':-1.2}
-        cbarint = {'Z500':500,'SLP':5,'IVT':100,'300W':10,'850T':5,'Z500Anom':0.5,'Z850':50,'SLPAnom':0.4,'850TAnom':0.3}
+        cbarstart = {'SLP':990,'IVT':0,'300W':0,'850T':250,'Z500Anom':-2,\
+                     'Z850':1200,'SLPAnom':-2.4,'850TAnom':-1,'850W':0}
+        cbarint = {'SLP':10,'IVT':150,'300W':15,'850T':5,'Z500Anom':1,'Z850':50,\
+                   'SLPAnom':0.4,'850TAnom':1,'850W':5}
         
-        colormap = {'Z500':'jet','SLP':'rainbow','IVT':'gnuplot2_r','300W':'hot_r','850T':'turbo','Z500Anom':newmap,'Z850':'turbo','SLPAnom':newmap,'850TAnom':newmap}
-        cbarlabs = {'Z500':'m','SLP':'hPa','IVT':'kg $\mathregular{m^{-1}}$ $\mathregular{s^{-1}}$','300W':'m/s','850T':'K','Z500Anom':r'$\mathbf{\sigma}$','Z850':'m','SLPAnom':r'$\mathbf{\sigma}$','850TAnom':r'$\mathbf{\sigma}$'}
-        plottitle = {'Z500':'Z500','SLP':'SLP','IVT':'IVT','300W':'300 hPa Wind','850T':'850 hPa Temperature','Z500Anom':'Z500 Anomaly','Z850':'Z850','SLPAnom':'SLP Anomaly','850TAnom':'850 hPa Temperature Anomaly'}
+        colormap = {'SLP':'rainbow','IVT':'gnuplot2_r','300W':'hot_r',\
+                    '850T':'turbo','Z500Anom':newmap,'Z850':'turbo',\
+                        'SLPAnom':newmap,'850TAnom':newmap,'850W':'hot_r'}
+        cbarlabs = {'SLP':'hPa','IVT':'kg $\mathregular{m^{-1}}$ $\mathregular{s^{-1}}$',\
+                    '300W':'m/s','850T':'K','Z500Anom':r'$\mathbf{\sigma}$','Z850':'m',\
+                        'SLPAnom':r'$\mathbf{\sigma}$','850TAnom':r'$\mathbf{\sigma}$',\
+                            '850W':'m/s'}
+        plottitle = {'SLP':'SLP','IVT':'IVT','300W':'300 hPa Wind',\
+                     '850T':'850 hPa Temperature','Z500Anom':'Z500 Anomaly',\
+                         'Z850':'Z850','SLPAnom':'SLP Anomaly',\
+                             '850TAnom':'850 hPa Temperature Anomaly', \
+                                 '850W':'850 hPa Wind'}
         #%% PLOT NODES from MATLAB
         
         #create subplot for mapping multiple timesteps
@@ -134,7 +173,13 @@ for metvar in metvars:
                   urcrnrlon=lonmax,resolution='l',area_thresh=area_thresh)
         xi, yi = map(lon,lat)
         ax = fig.add_subplot(len(metvars),4,i+1)
-        sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
+        if i in range(0,4):
+            if i == 3:
+                ax.set_title(f'Day {dayprev}',fontsize=10,fontweight="bold",pad=2)                
+            else:
+                ax.set_title(f'Day -{dayprev}',fontsize=10,fontweight="bold",pad=2)
+            
+        #sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
         # ax.text(0.0, 1.0, i+1, transform=ax.transAxes + sublabel_loc,
         #     fontsize=10, fontweight='bold', verticalalignment='top', 
         #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
@@ -152,14 +197,15 @@ for metvar in metvars:
         gridlinefont = 8.5
         parallels = np.arange(20.,71.,20.)
         meridians = np.arange(-160.,-109.,20.)
-        if i == 0 or i == 3:
-            map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-            map.drawmeridians(meridians,color=border_c,linewidth=border_w)
-        elif i == 7 or i == 8:
+        if i in range(0,25,4):
+            if i == 20:
+                map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+                map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+            else:
+                map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+                map.drawmeridians(meridians,color=border_c,linewidth=border_w)
+        elif i in range(21,25):
             map.drawparallels(parallels, color=border_c,linewidth=border_w)
-            map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-        elif i == 6:
-            map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
             map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
         else:
             map.drawparallels(parallels, color=border_c,linewidth=border_w)
@@ -179,14 +225,16 @@ for metvar in metvars:
             
         i += 1
         
-#CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.045,right=0.895,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
+##CUSTOMIZE SUBPLOT SPACING
 #fig.add_axis([left,bottom, width,height])
-cbar_ax = fig.add_axes([0.905,0.05,0.025,0.9]) #bottom colorbar
-#cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='vertical')
-cbar = fig.colorbar(colorm, cax=cbar_ax,orientation='vertical')
-cbar.ax.tick_params(labelsize=8)
-cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
+    ax_x = 0.831 - (0.1614*((i/4)-1))
+    cbar_ax = fig.add_axes([ax_y,ax_x,axwidth,axheight]) #bottom colorbar
+    cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='vertical')
+    #cbar = fig.colorbar(colorm, cax=cbar_ax,orientation='vertical')
+    cbar.ax.tick_params(labelsize=8)
+    cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
+
+fig.subplots_adjust(left=0.045,right=0.895,bottom=0.023, top=0.982,hspace=0.05, wspace=0.05) #bottom colorbar
 
     
 #SHOW MAP

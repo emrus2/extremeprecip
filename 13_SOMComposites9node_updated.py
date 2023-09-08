@@ -51,26 +51,23 @@ lonmin, lonmax = (-170.25,-105.75)
 #%% IMPORT MERRA2 DATA
 # define metvar
 metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850T','850TAnom']
-metvars = ['IVT']
+metvars = ['Z850']
 #metvar = '300W'
 for metvar in metvars:
     #define composite location
     #metvar = input('Enter MERRA-2 Variable: Z500, SLP, 850T, 300W, or IVT \n')
     if metvar == 'Z500Anom':
         folderpath = 'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\Z500'
-        filename = f'MERRA2_Z500_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
+        filename = f'MERRA2_Z500_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
     elif metvar == 'SLPAnom':
         folderpath = 'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\SLP'
-        filename = f'MERRA2_SLP_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
+        filename = f'MERRA2_SLP_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
     elif metvar == '850TAnom':
         folderpath = 'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\850T'
-        filename = f'MERRA2_850T_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
-    elif metvar == 'IVT':
-        folderpath = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}'
-        filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
+        filename = f'MERRA2_850T_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
     else:
         folderpath = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}'
-        filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
+        filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
     filepath = os.path.join(folderpath,filename)
     
     
@@ -81,24 +78,26 @@ for metvar in metvars:
     print(gridfile)
     gridlat = gridfile.variables['lat'][:]
     gridlon = gridfile.variables['lon'][:]
-    time = gridfile.variables['time'][:]
-    date = [datetime.strptime('198001090030','%Y%m%d%H%M') + timedelta(minutes = t) for t in time]
     if metvar == 'IVT':
-        Uvapor = gridfile.variables['UFLXQV'][:]
-        Vvapor = gridfile.variables['VFLXQV'][:]
-        merra = np.sqrt(Uvapor**2 + Vvapor**2)
+        U = gridfile.variables['UFLXQV'][:]
+        V = gridfile.variables['VFLXQV'][:]
+        merra = np.sqrt(U**2 + V**2)
+        time = gridfile.variables['time'][:]
     elif metvar == '300W':
-        Uwind = gridfile.variables['U'][:]
-        Vwind = gridfile.variables['V'][:]
-        merra = np.sqrt(Uwind**2 + Vwind**2)
+        U = np.squeeze(gridfile.variables['U'][:])
+        V = np.squeeze(gridfile.variables['V'][:])
+        merra = np.sqrt(U**2 + V**2)
+        time = gridfile.variables['date'][:]
     elif 'Anom' in metvar:
         merra = np.load(os.path.join(folderpath,f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.npy'))
+        time = gridfile.variables['date'][:]
     else:
         merra = gridfile.variables[merravar[metvar]][:]
-    gridfile.close()
-    
+        time = gridfile.variables['date'][:]
+    #date = [datetime.strptime('198001090030','%Y%m%d%H%M') + timedelta(minutes = t) for t in time]
     merra = np.squeeze(merra)
-    
+    gridfile.close()
+        
     if metvar == 'SLP':
         merra = merra/100
         
@@ -124,24 +123,24 @@ for metvar in metvars:
     U_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
     V_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
 
-    if metvar == 'IVT':
-        Uvaporreduced = Uvapor[:,latind,:]
-        Uvaporreduced = Uvaporreduced[:,:,lonind]
-        Vvaporreduced = Vvapor[:,latind,:]
-        Vvaporreduced = Vvaporreduced[:,:,lonind]
+    if metvar == 'IVT' or metvar == '300W':
+        Ureduced = U[:,latind,:]
+        Ureduced = Ureduced[:,:,lonind]
+        Vreduced = V[:,latind,:]
+        Vreduced = Vreduced[:,:,lonind]
         
         # loop through som patterns and calculate average
         for som in range(len(patterns[:,0])):
-            UvaporNode = [arr for i,arr in enumerate(Uvaporreduced) if assignment[i] == int(som + 1)]
-            UvaporMean = np.squeeze(np.mean(UvaporNode,axis=0))
-            U_composites[som]= UvaporMean
+            UNode = [arr for i,arr in enumerate(Ureduced) if assignment[i] == int(som + 1)]
+            UMean = np.squeeze(np.mean(UNode,axis=0))
+            U_composites[som]= UMean
             
-            VvaporNode = [arr for i,arr in enumerate(Vvaporreduced) if assignment[i] == int(som + 1)]
-            VvaporMean = np.squeeze(np.mean(VvaporNode,axis=0))
-            V_composites[som]= VvaporMean
+            VNode = [arr for i,arr in enumerate(Vreduced) if assignment[i] == int(som + 1)]
+            VMean = np.squeeze(np.mean(VNode,axis=0))
+            V_composites[som]= VMean
         
         som_composites = np.sqrt(U_composites**2 + V_composites**2)
-    #%% CLUSTER ASSIGNED PATTERNS AND CALCULATE AVERAGE
+
     else:
         # create array to store 12 SOM composites
         som_composites = np.zeros((len(patterns),len(gridlatreduced),len(gridlonreduced)))
@@ -191,7 +190,7 @@ for metvar in metvars:
         lowanom, highanom = (-1.3, 1.2)
         newmap = center_colormap(lowanom, highanom, center=0)
     lowlims = {'Z500':2850,'SLP':985,'IVT':0,'300W':0,'850T':252,'Z500Anom':lowanom,'Z850':1187,'SLPAnom':lowanom,'850TAnom':lowanom}
-    highlims = {'Z500':5700,'SLP':1022,'IVT':562,'300W':56,'850T':293,'Z500Anom':highanom,'Z850':1548,'SLPAnom':highanom,'850TAnom':highanom}
+    highlims = {'Z500':5700,'SLP':1022,'IVT':562,'300W':54,'850T':293,'Z500Anom':highanom,'Z850':1548,'SLPAnom':highanom,'850TAnom':highanom}
     
     contourstart = {'Z500':3000,'SLP':990,'IVT':0,'300W':5,'850T':250,'Z500Anom':-1.75,'Z850':1190,'SLPAnom':-2.25,'850TAnom':-1.2}
     contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':5,'850T':2.5,'Z500Anom':0.25,'Z850':30,'SLPAnom':0.25,'850TAnom':0.15}
@@ -252,17 +251,17 @@ for metvar in metvars:
         contour_c = '0.1'
         contour_w = 0.7
         #create contour map
-        if metvar == 'IVT':
-            U_arrs = U_composites[i,:,:]
-            V_arrs = V_composites[i,:,:]
-            interval = 7
-            size = 1000
-            skip = (slice(None, None, interval), slice(None, None, interval))
-            vectorm = map.quiver(xi[skip],yi[skip],U_arrs[skip],V_arrs[skip],color='darkgreen')
+        # if metvar == 'IVT':
+        #     U_arrs = U_composites[i,:,:]
+        #     V_arrs = V_composites[i,:,:]
+        #     interval = 7
+        #     size = 1000
+        #     skip = (slice(None, None, interval), slice(None, None, interval))
+        #     vectorm = map.quiver(xi[skip],yi[skip],U_arrs[skip],V_arrs[skip],color='darkgreen')
             #vectorm = map.quiver(xi[skip],yi[skip],U_arrs[skip],V_arrs[skip],pivot='mid',scale=size, scale_units='inches',headlength=3.4,headwidth=2,color='g',width=0.005)
-        else:
-            contourm = map.contour(xi,yi,arr,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]),zorder=2)
-            plt.clabel(contourm,levels=contourm.levels[::2],fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
+        # else:
+        contourm = map.contour(xi,yi,arr,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]),zorder=2)
+        plt.clabel(contourm,levels=contourm.levels[::2],fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
             
         #add yuba shape
         #map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,linewidth=0.8,color='r')
@@ -280,5 +279,5 @@ for metvar in metvars:
     #SHOW MAP
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
     os.chdir(save_dir)
-    plt.savefig(f'{metvar}_{percentile}_{numpatterns}_SOM_composite_1.png',dpi=300)
+    plt.savefig(f'{metvar}_{percentile}_{numpatterns}_SOM_composite_upd.png',dpi=300)
     plt.show()

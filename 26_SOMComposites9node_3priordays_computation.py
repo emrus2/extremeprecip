@@ -30,12 +30,12 @@ metpath = {'Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressur
 
 #%% IDENTIFY DATESTRINGS OF INTEREST
 # define variable of interest
-metvar = 'IVT'
+metvar = '850W'
 # loop through som patterns 1-9
 #for sompattern in range(1,10):
-for sompattern in range(1,2):
-    # loop through previous days 1-3
-    for dayprev in range(1):
+for sompattern in range(1,10):
+    # loop through previous days 0-3
+    for dayprev in range(0,4):
     #for dayprev in range(0,4):
         # reduce extreme days to those assigned to node
         extremenodedays = [str(j) for i,j in extremeassign if float(i) == float(sompattern)]
@@ -55,12 +55,23 @@ for sompattern in range(1,2):
             print(ds)
             ds = ds.drop_vars(['UFLXQL','VFLXQL'])
             print(ds.variables)
-            # calculate IVT magnitude
-            ds = ds.assign(IVTmag = np.sqrt(ds.UFLXQV**2 + ds.VFLXQV**2))
-            ds = ds.drop_vars(['UFLXQV','VFLXQV'])
-            # calculate day composites
-            total_means = np.squeeze(ds.mean(dim='time'))
-            print(total_means) #should be 1 time dimension
+            # calculate day average U,V components
+            means = np.squeeze(ds.mean(dim='time'))
+            print(means) #should be 1 time dimension
+            # calculate average IVT magnitude
+            means = means.assign(IVTmag = np.sqrt(means.UFLXQV**2 + means.VFLXQV**2))
+            means = means.drop_vars(['UFLXQV','VFLXQV'])
+            print(means)            
+        elif 'W' in metvar:
+            ds = xr.open_mfdataset(files, combine='nested', concat_dim='time')
+            print(ds.variables)
+            # calculate day average U,V components
+            means = np.squeeze(ds.mean(dim='time'))
+            print(means) #should be 1 time dimension
+            # calculate average IVT magnitude
+            means = means.assign(Windmag = np.sqrt(means.U**2 + means.V**2))
+            means = means.drop_vars(['U','V'])
+            print(means)            
         else:
             ds = xr.open_mfdataset(files, combine='nested',concat_dim='time')
             #calculate daily average merra data
@@ -68,10 +79,10 @@ for sompattern in range(1,2):
             ds.squeeze() #should result in 162(260) dates
             ds['date'] = ds['date'].astype('datetime64')
             # calculate day composites
-            total_means = np.squeeze(ds.mean(dim='date'))
-            print(total_means) #should be 1 time dimension
+            means = np.squeeze(ds.mean(dim='date'))
+            print(means) #should be 1 time dimension
             
         #%% SAVE PREVIOUS DAY COMPOSITE AS DATASET
         os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\SOMPreviousDaysComposites\\SOM{sompattern}')
         savefile = f'Node{sompattern}_{dayprev}dayprior_composite{metvar}.nc'
-        total_means.to_netcdf(savefile)
+        means.to_netcdf(savefile)
