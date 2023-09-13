@@ -49,7 +49,7 @@ dates = np.load('90Percentile_ExtremeDays.npy')
 #%% IMPORT MERRA2 DATA
 # define metvar
 #metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850T','850TAnom']
-metvar = '850TADV'
+metvar = '850QVECT'
 #define composite location
 #metvar = input('Enter MERRA-2 Variable: Z500, SLP, 850T, 300W, or IVT \n')
 if metvar == 'Z500Anom':
@@ -63,7 +63,7 @@ elif metvar == '850TAnom':
     filename = f'MERRA2_850T_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
 else:
     folderpath = f'DailyMERRA2\\{metvar}'
-    filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
+    filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
 filepath = os.path.join(folderpath,filename)
 
 
@@ -78,10 +78,10 @@ if metvar == 'IVT':
     Uvapor = gridfile.variables['UFLXQV'][:]
     Vvapor = gridfile.variables['VFLXQV'][:]
     merra = np.sqrt(Uvapor**2 + Vvapor**2)
-elif metvar == '300W':
-    Uwind = gridfile.variables['U'][:]
-    Vwind = gridfile.variables['V'][:]
-    merra = np.sqrt(Uwind**2 + Vwind**2)
+elif metvar == '300W' or metvar == '850QVECT':
+    U = gridfile.variables['U'][:]
+    V = gridfile.variables['V'][:]
+    merra = np.sqrt(U**2 + V**2)
 elif 'Anom' in metvar:
     merra = np.load(os.path.join(folderpath,f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.npy'))
 else:
@@ -103,7 +103,21 @@ if metvar == '850TADV':
     Vvect = gridfile.variables[merravar[metvar]][:]
     gridfile3.close()
     merra = merra * 3600
-    
+
+# if metvar == '850QVECT':
+#     Ugrad = np.ufunc.reduce(np.add,np.gradient(U),axis=2)
+#     Vgrad = np.ufunc.reduce(np.add,np.gradient(V),axis=1)
+#     merra = Ugrad + Vgrad
+#     # merra = np.ufunc.reduce(np.add,np.gradient(U)) + np.ufunc.reduce(np.add,np.gradient(V))
+#     merra *= 10**15
+
+def divergence(F):
+    """ Computes divergence of vector field 
+    f: array -> vector field components [Fx,Fy,Fz,...]
+    sp: array -> spacing between points in respecitve directions [spx, spy,spz,...]
+    """
+    num_dims = len(F)
+    return np.ufunc.reduce(np.add, [np.gradient(F[i], axis=i) for i in range(num_dims)])
 #%% REDUCE LAT AND LON TO DESIRED AREA
 
 #REDUCE VARIABLES TO DESIRED AREA
@@ -119,9 +133,9 @@ gridlonreduced = gridlon[lonind]
 merrareduced = merra[:,latind,:]
 merrareduced = merrareduced[:,:,lonind]
 #reduce winds
-Ureduced = Uvect[:,latind,:]
+Ureduced = U[:,latind,:]
 Ureduced = Ureduced[:,:,lonind]
-Vreduced = Vvect[:,latind,:]
+Vreduced = V[:,latind,:]
 Vreduced = Vreduced[:,:,lonind]
 #print(np.amin(merrareduced),np.amax(merrareduced))
 
@@ -131,6 +145,9 @@ for day in np.arange(260):
     merraday = merrareduced[day,:,:] # K/s
     Uday = Ureduced[day,:,:]
     Vday = Vreduced[day,:,:]
+    F = np.array([Uday,Vday])
+    merraday = divergence(F)
+
     #print(np.nanmin(merraday),np.nanmax(merraday))
 
     # DETERMINE MAX AND MIN VALIUES
@@ -164,7 +181,8 @@ for day in np.arange(260):
               urcrnrlon=lonmax,resolution='l',area_thresh=area_thresh)
     xi, yi = map(lon,lat)
     #create colormap of MERRA2 data
-    colorm = map.pcolor(xi,yi,merraday,cmap=newmap,vmin=zmin,vmax=zmax)
+    #colorm = map.pcolor(xi,yi,merraday,cmap=newmap,vmin=zmin,vmax=zmax)
+    colorm = map.pcolor(xi,yi,merraday,cmap=newmap)    
     #define border color and thickness
     border_c = '0.4'
     border_w = 0.4

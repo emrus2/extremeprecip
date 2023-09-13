@@ -16,9 +16,10 @@ import xarray as xr
 #import netCDF4 as nc
 #import numpy as np
 #from datetime import datetime, timedelta
+# import metpy
 import metpy.calc as mpcalc
 from metpy.units import units
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 #%% IMPORT MERRA2 DATA
 
@@ -28,43 +29,43 @@ plev_int = int(plev) # integer form for q-vector calculation
 
 # hPa temperature
 tempfolder =  f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{plev}T'
-tempfile = f'MERRA2_{plev}T_Yuba_Extremes90_Daily_1980-2021_WINTERDIST.nc'
+tempfile = f'MERRA2_{plev}T_Yuba_Extremes90_Daily_1980-2021_WINTERDIST_updated.nc'
 temppath = os.path.join(tempfolder,tempfile)
-temp = xr.open_dataarray(temppath).squeeze()
-print(temp)
+temps = xr.open_dataset(temppath).squeeze()
+print(temps)
 
 # hPa winds
 windfolder = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{plev}W'
-windfile = f'MERRA2_{plev}W_Yuba_Extremes90_Daily_1980-2021_WINTERDIST.nc'
+windfile = f'MERRA2_{plev}W_Yuba_Extremes90_Daily_1980-2021_WINTERDIST_updated.nc'
 windpath = os.path.join(windfolder,windfile)
-windset = xr.open_dataset(windpath)
-print(windset)
-Uwind = windset['U'].squeeze()
-Vwind = windset['V'].squeeze()
+winds = xr.open_dataset(windpath)
+winds = winds.squeeze()
+print(winds)
 
 #%% COMPUTE TEMPERATURE ADVECTION AND Q-VECTORS
 # calculate advection
-tempadvection = mpcalc.advection(scalar=temp,u=Uwind,v=Vwind,x_dim=-1,y_dim=-2,vertical_dim=None)
-
-# print(tempadvection.data.units)
+tempadvection = mpcalc.advection(scalar=temps.T,u=winds.U,v=winds.V,x_dim=-1,y_dim=-2,vertical_dim=None)
+print(tempadvection.data.units)
+tempadvection = tempadvection.metpy.convert_units('celsius/hour')
 
 # calculate q-vector components
-u_qvect, v_qvect = mpcalc.q_vector(u=Uwind,v=Vwind,temperature=temp,pressure=plev_int*units.hPa)
-
+u_qvect, v_qvect = mpcalc.q_vector(u=winds.U,v=winds.V,temperature=temps.T,pressure=plev_int*units.hPa)
+print(u_qvect.data.units == v_qvect.data.units)
+#print(u_qvect.data.units)
+u_qvect = u_qvect.rename('U')
+v_qvect = v_qvect.rename('V')
+qvects = xr.merge([u_qvect,v_qvect])
 #%% SAVE ADVECTION AND Q-VECTOR DATASETS
 # temperature advection
 os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{plev}TADV')
-savefile = f'MERRA2_{plev}TADV_Yuba_Extremes90_Daily_1980-2021_WINTERDIST.nc'
+savefile = f'MERRA2_{plev}TADV_Yuba_Extremes90_Daily_1980-2021_WINTERDIST_updated.nc'
 tempadvection.to_netcdf(savefile)
 
 # U q-vector component
 os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{plev}QVECT')
-savefileU = f'MERRA2_{plev}UQVECT_Yuba_Extremes90_Daily_1980-2021_WINTERDIST.nc'
-u_qvect.to_netcdf(savefileU)
+savefileQ = f'MERRA2_{plev}QVECT_Yuba_Extremes90_Daily_1980-2021_WINTERDIST_updated.nc'
+qvects.to_netcdf(savefileQ)
 
-# V q-vector component
-savefileV = f'MERRA2_{plev}VQVECT_Yuba_Extremes90_Daily_1980-2021_WINTERDIST.nc'
-v_qvect.to_netcdf(savefileV)
 
 #%%
 
