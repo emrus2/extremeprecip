@@ -15,6 +15,7 @@ import netCDF4 as nc #if this doesn't work, try to reinstall in anaconda prompt 
     #conda install netcdf4
 import numpy as np
 import os
+import xarray as xr
 os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj")
 import scipy.io
 from datetime import datetime, timedelta
@@ -23,19 +24,23 @@ os.chdir('I:\\Emma\\FIROWatersheds\\Data')
 #define MERRA2 data location
 #metvars = ['SLP', '300W', 'Z500Anom','SLPAnom']
 percentile = 90
+daysprior = 2
+clusters = daysprior + 1
 metvar = 'IVT'
 #for metvar in metvars:
 merravar = {'Z500':'H','SLP':'SLP','850T':'T','Z850':'H','Z500Anom':'H'}
 
 folderpath = f'DailyMERRA2\\{metvar}'
-filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_4d.nc'
+filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{daysprior+1}d.nc'
 filepath = os.path.join(folderpath,filename)
+ds = xr.open_mfdataset(filepath, combine='nested',concat_dim='time')
 
+#%%
 #COLLECT VARIABLE DATA FROM MERRA2 FILE
 #open the netcdf file in read mode
 gridfile = nc.Dataset(filepath,mode='r')
 date = gridfile.variables['date'][:]
-date = [datetime.strptime('19800101','%Y%m%d') + timedelta(days=int(j)) for j in date]
+date = [datetime.strptime('19800107','%Y%m%d') + timedelta(days=int(j)) for j in date]
 gridlat = gridfile.variables['lat'][:]
 gridlon = gridfile.variables['lon'][:]
 Uvapor = gridfile.variables['UFLXQV'][:]
@@ -46,14 +51,14 @@ gridfile.close()
 # reduce merra to 3D array
 merra = np.squeeze(merra)
 
+#%%
 # import list of extreme days
-extremedates = np.load('90Percentile_ExtremeDays_4d.npy')
+extremedates = np.load(f'90Percentile_ExtremeDays_{clusters}d.npy')
 #convert extremedates tp datetime
 extremedates = [datetime.strptime(i,'%Y%m%d') for i in extremedates]
 
 # cluster dates into events
 extremeevents = []
-clusters = 4
 for d in range(0,len(extremedates),clusters):
     print(d)
     event = []
@@ -90,13 +95,13 @@ merraflat = merrareduced.reshape(len(merrareduced),-1)
 
 flatlen = len(merraflat[1])
 # loop through extreme precipitation events
-alldata = np.zeros((len(extremeevents),flatlen*4))
+alldata = np.zeros((len(extremeevents),flatlen*clusters))
 for j,event in enumerate(extremeevents):
     # create empty array to store event data
     merraevent = np.zeros((clusters,flatlen))
     for count,day in enumerate(event):
         # find associated index
-        if day in date: # can remove once the 19800107 is done
+        # if day in date: # can remove once the 19800107 is done
             # find index of merra data for the extreme date
             dayindx = date.index(day)
             # define merra data as that of index, append to storage array
@@ -110,29 +115,29 @@ for j,event in enumerate(extremeevents):
 
 #%% HORIZONTALLY CONCATENATE EXTREME EVENTS, THEN FLATTEN
 # loop through extreme precipitation events
-alldata = np.zeros((len(extremeevents),len(gridlatreduced),len(gridlonreduced)*4))
-for j,event in enumerate(extremeevents):
-    # create empty array to store event data
-    merraevent = np.zeros((clusters,len(gridlatreduced),len(gridlonreduced)))
-    for count,day in enumerate(event):
-        # find associated index
-        if day in date: # can remove once the 19800107 is done
-            # find index of merra data for the extreme date
-            dayindx = date.index(day)
-            # define merra data as that of index, append to storage array
-            merraday = merrareduced[dayindx,:,:]
-            merraevent[count,:,:] = merraday
-    # horizontally concatenate merra data for each event
-    # merraevent = merraevent.reshape(len(merraevent),-1)
-    # data = np.concatenate(merraevent,axis=0)
-    data = np.hstack(merraevent)
-    alldata[j,:,:] = data
+# alldata = np.zeros((len(extremeevents),len(gridlatreduced),len(gridlonreduced)*4))
+# for j,event in enumerate(extremeevents):
+#     # create empty array to store event data
+#     merraevent = np.zeros((clusters,len(gridlatreduced),len(gridlonreduced)))
+#     for count,day in enumerate(event):
+#         # find associated index
+#         if day in date: # can remove once the 19800107 is done
+#             # find index of merra data for the extreme date
+#             dayindx = date.index(day)
+#             # define merra data as that of index, append to storage array
+#             merraday = merrareduced[dayindx,:,:]
+#             merraevent[count,:,:] = merraday
+#     # horizontally concatenate merra data for each event
+#     # merraevent = merraevent.reshape(len(merraevent),-1)
+#     # data = np.concatenate(merraevent,axis=0)
+#     data = np.hstack(merraevent)
+#     alldata[j,:,:] = data
 
-#flatten data from 3D to 2D (260x10197)
-alldata = alldata.reshape(len(alldata),-1)
+# #flatten data from 3D to 2D (260x10197)
+# alldata = alldata.reshape(len(alldata),-1)
 
 #%% SAVE DATA ARRAY TO OPEN IN MATLAB
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomInput'
 os.chdir(mat_dir)
 datadict = {'lat': gridlatreduced, 'lon': gridlonreduced, 'merra': alldata}
-scipy.io.savemat(f'{metvar}_{percentile}_data_4d.mat', mdict = datadict)
+scipy.io.savemat(f'{metvar}_{percentile}_data_{clusters}d.mat', mdict = datadict)

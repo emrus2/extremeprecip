@@ -74,7 +74,7 @@ def dateprior(date,dayprev):
 
 extremedatesprior = []
 
-daysprior = 3
+daysprior = 2
 # iterate through each string in list
 for date in extremedates:
     for i in range(daysprior,0,-1):
@@ -127,27 +127,21 @@ for metvar in metvars:
     #save as file
     #define new files directory and names
     os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}')
-    savefile = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_4d.nc'
+    savefile = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{daysprior+1}d.nc'
     #savefile2 = f'{metvar}_extremes_composite.nc'
     ds.to_netcdf(savefile)
     #total_means.to_netcdf(savefile2)
     
     #%% SAVE LIST OF SUCCEEDING EXTREME DAYS
-    np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDays_4d.npy',np.array(extremedatesprior))
+    np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDays_{daysprior+1}d.npy',np.array(extremedatesprior))
 
 #%% CALCULATE AVERAGE OF FOLDER
-
-# import os
-# import numpy as np
-# import xarray as xr
-# import glob
-# import netCDF4 as nc
-# #import numpy as np
-# from datetime import datetime, timedelta
-
-
-# folderpath = 'I:\\MERRA2\\Daily_and_Subdaily\\IVT_daily'
-# os.chdir(folderpath)
-# extremefile = 'MERRA2.tavg1_2d_int_Nx.19800107.nc4'
-# data = xr.open_dataset(extremefile)
-# print(data)
+import os
+import xarray as xr
+metvar = 'IVT'
+daysprior = 2
+percentile = 90
+os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}')
+savefile = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{daysprior+1}d.nc'
+ds = xr.open_mfdataset(savefile, combine='nested',concat_dim='time')
+print(ds.date)
