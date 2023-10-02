@@ -100,7 +100,7 @@ latweights = np.sqrt(np.cos((np.radians(gridlatreduced))))
 for i in range(data.shape[1]): #lats
     data[:,i,:] *= latweights[i]
     
-#flatten data from 3D to 2D (130x10197)
+#flatten data from 3D to 2D (260x10197)
 data = data.reshape(len(data),-1)
 
 #%% SAVE DATA ARRAY TO OPEN IN MATLAB
