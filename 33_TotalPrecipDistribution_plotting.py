@@ -69,48 +69,38 @@ allprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{nu
 maxprecip = [max(s) for s in allprecip]
 minprecip = [min(s) for s in allprecip]
 #%% SUBPLOTS OF NODES
-colors = ('tomato','indianred','gold','lightgreen','mediumseagreen','cornflowerblue','royalblue','plum','darkorchid','magenta',)
-zorders = (-1,-4,-2,-7,-6,-5,-8,-9,-3)
+# colors = ('tomato','indianred','gold','lightgreen','mediumseagreen','cornflowerblue','royalblue','plum','darkorchid','magenta',)
+# zorders = (-1,-4,-2,-7,-6,-5,-8,-9,-3)
 
 fig, ax = plt.subplots(layout='constrained')
-plot = sns.histplot(NCdatawinter, kde=True, bins=50, zorder=1, \
-                 color = 'slategrey')
+plot = sns.histplot(NCdatawinter, kde=True, bins=75, zorder=1, \
+                 color = 'slategrey',stat='percent',alpha=0.7)
 
-for i,node in enumerate(allprecip):
-    line = plt.axvline(x=minprecip[i],ymax=0.9,color=colors[i],linewidth=1.5,alpha=0.8,zorder=zorders[i],label=i+1)
-    plt.axvline(x=maxprecip[i],ymax=0.9,color=colors[i],linewidth=1.5,alpha=0.8,zorder=zorders[i])
-    plt.fill_betweenx(y=np.arange(0,700), x1=minprecip[i], x2=maxprecip[i],color=colors[i],zorder=zorders[i],alpha=0.5)
+extrlim = 51.53282318
+ymax = 21
+xmax = 208
+# ax.axvline(x=extrlim,color='red',linewidth=2,alpha=0.5)
+# plt.fill_betweenx(y=plot, x1=extrlim, x2=xmax,color='red')
+for line in ax.lines:
+    x, y = line.get_xydata().T
+    ax.fill_between(x, 0, y, color='royalblue', where=x<extrlim,alpha=0.5,label = '<90th Percentile')
+    ax.fill_between(x, 0, y, color='red', where=x>extrlim,alpha=0.5,label='>90th Percentile')
+    # ax.fill_betweenx(y, x, extrlim, color='red')
+
+
+# for i,node in enumerate(allprecip):
+#     line = plt.axvline(x=minprecip[i],ymax=0.9,color=colors[i],linewidth=1.5,alpha=0.8,zorder=zorders[i],label=i+1)
+#     plt.axvline(x=maxprecip[i],ymax=0.9,color=colors[i],linewidth=1.5,alpha=0.8,zorder=zorders[i])
+#     plt.fill_betweenx(y=np.arange(0,700), x1=minprecip[i], x2=maxprecip[i],color=colors[i],zorder=zorders[i],alpha=0.5)
 
 #CUSTOMIZE SUBPLOT SPACING
-ax.set_ylabel('Days',fontweight='bold')
+ax.set_ylabel('Percent of Days (%)',fontweight='bold')
 ax.set_xlabel('Precipitation (mm)',fontweight='bold')
 ax.legend(loc='upper center',ncols=9,columnspacing=1.4,handletextpad=0.4,fontsize=9.7)
-ax.set_ylim(0,775)
-ax.set_xlim(-1,208)
+ax.set_ylim(0,ymax)
+ax.set_xlim(-1,xmax)
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
 os.chdir(save_dir)
-# plt.savefig(f'{percentile}_{numpatterns}_PrecipDistribution.png',dpi=300)
-plt.show()
-
-#%% ZOOMED IN GRAPH
-fig, ax = plt.subplots(layout='constrained')
-plot = sns.histplot(NCdatawinter, kde=True, bins=50, zorder=1, \
-                 color = 'slategrey')
-
-for i,node in enumerate(allprecip):
-    line = plt.axvline(x=minprecip[i],ymax=0.9,color=colors[i],linewidth=1.5,alpha=0.8,zorder=zorders[i],label=i+1)
-    plt.axvline(x=maxprecip[i],ymax=0.9,color=colors[i],linewidth=1.5,alpha=0.8,zorder=zorders[i])
-    plt.fill_betweenx(y=np.arange(0,55), x1=minprecip[i], x2=maxprecip[i],color=colors[i],zorder=zorders[i],alpha=0.5)
-
-#CUSTOMIZE SUBPLOT SPACING
-ax.set_ylabel('Days',fontweight='bold')
-ax.set_xlabel('Precipitation (mm)',fontweight='bold')
-ax.legend(loc='upper center',ncols=9,columnspacing=1.4,handletextpad=0.4,fontsize=9.7)
-ax.set_ylim(0,60)
-ax.set_xlim(50,208)
-
-save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
-os.chdir(save_dir)
-# plt.savefig(f'{percentile}_{numpatterns}_PrecipDistribution_ZOOMED.png',dpi=300)
+plt.savefig(f'{percentile}_{numpatterns}_PrecipDistribution2.png',dpi=300)
 plt.show()
