@@ -84,14 +84,16 @@ colormap = {'Z500':'jet','SLP':'rainbow','IVT':'gnuplot2_r','300W':'hot_r','850T
 cbarlabs = {'Z500':'m','SLP':'hPa','IVT':'kg $\mathregular{m^{-1}}$ $\mathregular{s^{-1}}$','300W':'m/s','850T':'K','Z500Anom':r'$\mathbf{\sigma}$','SLPAnom':r'$\mathbf{\sigma}$'}
 plottitle = {'Z500':'Z500','SLP':'SLP','IVT':'IVT','300W':'300 hPa Wind','850T':'850 hPa Temperature','Z500Anom':'Z500 Anomaly','SLPAnom':'SLP Anomaly'}
 
+
 #%% PLOT NODES from MATLAB
+contourcolor = {0:'#8F3A13',1:'#49DBCD',2:'0.15'}
+contourline = {0:'dashdot',1:'dashed',2:'solid'}
 
 #create subplot for mapping multiple timesteps
-fig = plt.figure(figsize=(7.2,18))
+fig = plt.figure(figsize=(7.2,5))
 #fig.suptitle(f'{plottitle[metvar]} SOMs',fontsize=13,fontweight="bold",y=0.9875)
-place = 1
 for i, arr in enumerate(patterns):
-    # reshape merra data for plotting
+    # reshape merra data for plotting    
     merrareduced = arr.reshape(clusters,len(gridlat),len(gridlon))
     # define percentage of node assignment
     perc_assigned = str(round(pat_prop[i]*100,1))
@@ -100,75 +102,71 @@ for i, arr in enumerate(patterns):
     #patfreq_col = str(1 / (pat_freq[i]/17))
     gbcolor = 1.1-(pat_freq[i]/44)
     patfreq_col = (1,gbcolor,gbcolor)
+    # add subplot
+    ax = fig.add_subplot(3,3,i+1)
+    #convert lat and lon into a 2D array
+    lon, lat = np.meshgrid(gridlon,gridlat) 
+    #define area threshold for basemap
+    area_thresh = 1E4
+    #create equidistant cylindrical projection basemap
+    map = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,\
+              urcrnrlon=lonmax,resolution='l',area_thresh=area_thresh)
+    xi, yi = map(lon,lat)
+    sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
+    ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
+        fontsize=10, fontweight='bold', verticalalignment='top', 
+        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
+    #define border color and thickness
+    border_c = '0.4'
+    border_w = 0.4
+    #create map features
+    map.drawcoastlines(color=border_c, linewidth=border_w)
+    map.drawstates(color=border_c, linewidth=border_w)
+    map.drawcountries(color=border_c, linewidth=border_w)
+    gridlinefont = 8.5
+    parallels = np.arange(20.,71.,20.)
+    meridians = np.arange(-160.,-109.,20.)
+    #define contour color and thickness
+    contour_c = '0.1'
+    contour_w = 0.6
+
     #MAP DESIRED VARIABLE
     for j in range(len(merrareduced)):
         merraplot = merrareduced[j]
-        #convert lat and lon into a 2D array
-        lon, lat = np.meshgrid(gridlon,gridlat) 
-        #define area threshold for basemap
-        area_thresh = 1E4
-        #create equidistant cylindrical projection basemap
-        map = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,\
-                  urcrnrlon=lonmax,resolution='l',area_thresh=area_thresh)
-        xi, yi = map(lon,lat)
-        ax = fig.add_subplot(9,3,place)
-        sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
-        ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
-            fontsize=10, fontweight='bold', verticalalignment='top', 
-            bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-        if len(perc_assigned) == 4:
-            ax.text(x=0.755, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-                fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
-                bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
-        else:
-            ax.text(x=0.795, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-                fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
-                bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
-        # ax.text(x=0.75, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-        #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
-        #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-        # ax.text(x=0.4, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
-        #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'blue',
-        #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-        
-        
-        #create colormap of MERRA2 data
-        colorm = map.pcolor(xi,yi,merraplot,shading='auto',cmap=colormap[metvar],vmin=lowlims[metvar],vmax=highlims[metvar],zorder=1)
-        
-        #define border color and thickness
-        border_c = '0.4'
-        border_w = 0.4
-        #create map features
-        map.drawcoastlines(color=border_c, linewidth=border_w)
-        map.drawstates(color=border_c, linewidth=border_w)
-        map.drawcountries(color=border_c, linewidth=border_w)
-        gridlinefont = 8.5
-        parallels = np.arange(20.,71.,20.)
-        meridians = np.arange(-160.,-109.,20.)
-        if i == 0 or i == 3:
-            map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-            map.drawmeridians(meridians,color=border_c,linewidth=border_w)
-        elif i == 7 or i == 8:
-            map.drawparallels(parallels, color=border_c,linewidth=border_w)
-            map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-        elif i == 6:
-            map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-            map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-        else:
-            map.drawparallels(parallels, color=border_c,linewidth=border_w)
-            map.drawmeridians(meridians,color=border_c,linewidth=border_w)
-        #define contour color and thickness
-        contour_c = '0.1'
-        contour_w = 0.7
+        if j == 2:
+            colorm = map.pcolor(xi,yi,merraplot,shading='auto', cmap=colormap[metvar], \
+                    vmin=lowlims[metvar],vmax=highlims[metvar],zorder=1)
         #create contour map
-        contourm = map.contour(xi,yi,merraplot,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]),zorder=2)
-        plt.clabel(contourm,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]*2),fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
+        else:
+            contourm = map.contour(xi,yi,merraplot,colors=contourcolor[j], \
+                    linewidths=contour_w,levels=np.arange(contourstart[metvar], \
+                    highlims[metvar]+1,contourint[metvar]),zorder=j+2, linestyles=contourline[j])
+        # plt.clabel(contourm,levels=np.arange(contourstart[metvar], \
+        #         highlims[metvar]+1,contourint[metvar]*2),fontsize=6, \
+        #         inline_spacing=1,colors=contourcolor[j],zorder=2,manual=False)
+    if len(perc_assigned) == 4:
+        ax.text(x=0.755, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+            fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
+            bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
+    else:
+        ax.text(x=0.795, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+            fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
+            bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
+    if i == 0 or i == 3:
+        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+        map.drawmeridians(meridians,color=border_c,linewidth=border_w)
+    elif i == 7 or i == 8:
+        map.drawparallels(parallels, color=border_c,linewidth=border_w)
+        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+    elif i == 6:
+        map.drawparallels(parallels, labels=[1,0,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+        map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
+    else:
+        map.drawparallels(parallels, color=border_c,linewidth=border_w)
+        map.drawmeridians(meridians,color=border_c,linewidth=border_w)
             
-        #add yuba shape
-        #map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,linewidth=0.8,color='w')
-        #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
-        plt.scatter(-120.9,39.5,color='w',marker='*',linewidths=0.7,zorder=4)
-        place +=1
+    #add yuba shape
+    plt.scatter(-120.9,39.5,color='w',marker='*',linewidths=0.7,zorder=6)
     
 #CUSTOMIZE SUBPLOT SPACING
 fig.subplots_adjust(left=0.05,right=0.9,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
@@ -182,5 +180,5 @@ cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
 os.chdir(save_dir)
-plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d.png',dpi=300)
+plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d_sim.png',dpi=300)
 plt.show()
