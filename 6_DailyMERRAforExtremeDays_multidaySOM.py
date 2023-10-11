@@ -74,7 +74,7 @@ def dateprior(date,dayprev):
 
 extremedatesprior = []
 
-daysprior = 2
+daysprior = 4
 # iterate through each string in list
 for date in extremedates:
     for i in range(daysprior,0,-1):
@@ -136,12 +136,12 @@ for metvar in metvars:
     np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDays_{daysprior+1}d.npy',np.array(extremedatesprior))
 
 #%% CALCULATE AVERAGE OF FOLDER
-import os
-import xarray as xr
-metvar = 'IVT'
-daysprior = 2
-percentile = 90
-os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}')
-savefile = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{daysprior+1}d.nc'
-ds = xr.open_mfdataset(savefile, combine='nested',concat_dim='time')
-print(ds.date)
+# import os
+# import xarray as xr
+# metvar = 'IVT'
+# daysprior = 2
+# percentile = 90
+# os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}')
+# savefile = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{daysprior+1}d.nc'
+# ds = xr.open_mfdataset(savefile, combine='nested',concat_dim='time')
+# print(ds.date)

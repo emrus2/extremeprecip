@@ -24,7 +24,7 @@ os.chdir('I:\\Emma\\FIROWatersheds\\Data')
 #define MERRA2 data location
 #metvars = ['SLP', '300W', 'Z500Anom','SLPAnom']
 percentile = 90
-daysprior = 2
+daysprior = 4
 clusters = daysprior + 1
 metvar = 'IVT'
 #for metvar in metvars:
@@ -40,7 +40,7 @@ ds = xr.open_mfdataset(filepath, combine='nested',concat_dim='time')
 #open the netcdf file in read mode
 gridfile = nc.Dataset(filepath,mode='r')
 date = gridfile.variables['date'][:]
-date = [datetime.strptime('19800107','%Y%m%d') + timedelta(days=int(j)) for j in date]
+date = [datetime.strptime('19800105','%Y%m%d') + timedelta(days=int(j)) for j in date]
 gridlat = gridfile.variables['lat'][:]
 gridlon = gridfile.variables['lon'][:]
 Uvapor = gridfile.variables['UFLXQV'][:]
