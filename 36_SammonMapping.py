@@ -9,12 +9,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 #%%
-daysprior = 2
+daysprior = 4
 clusters = daysprior + 1
 
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
-sammon = np.load(f'Sammon_{clusters}d.npy')
+sammon = np.load(f'Sammon_{clusters}d_test.npy')
 
 #%%
 fig, ax = plt.subplots(layout='constrained')
@@ -25,8 +25,13 @@ ax.plot(X,Y,'ko')
 lw = 1
 col = 'k'
 
-for i in range(9):
-    ax.annotate(i+1,(X[i]-400,Y[i]-1700))
+leftcorners = (-800,-450)
+rightcorners = (450,-450)
+centers = ()
+for i in range(len(sammon)):
+    xannot = {0:X[i]+leftcorners[0],1:X[i]-50,2:X[i]+rightcorners[0],3:X[i]-950,4:X[i]+200,5:X[i]+450,6:X[i]+leftcorners[0],7:X[i]+250,8:X[i]+rightcorners[0]}
+    yannot = {0:Y[i]+leftcorners[1],1:Y[i]-1700,2:Y[i]+rightcorners[1],3:Y[i]-250,4:Y[i]-1500,5:Y[i]-450,6:Y[i]+leftcorners[1],7:Y[i]+750,8:Y[i]+rightcorners[1]}
+    ax.annotate(i+1,(xannot[i],yannot[i]))
     if i not in range(2,9,3):
         ax.plot(X[i:i+2],Y[i:i+2],color=col,linewidth=lw)
     if i < 6:

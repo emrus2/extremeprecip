@@ -87,11 +87,10 @@ plottitle = {'Z500':'Z500','SLP':'SLP','IVT':'IVT','300W':'300 hPa Wind','850T':
 #%% PLOT NODES from MATLAB
 
 #create subplot for mapping multiple timesteps
-fig = plt.figure(figsize=(7.2,11))
+fig = plt.figure(figsize=(20,7.8))
 #fig.suptitle(f'{plottitle[metvar]} SOMs',fontsize=13,fontweight="bold",y=0.9875)
-place = 1
 for i, arr in enumerate(patterns):
-    
+    place = 1
     # reshape merra data for plotting
     merrareduced = arr.reshape(clusters,len(gridlat),len(gridlon))
     # define percentage of node assignment
@@ -112,25 +111,26 @@ for i, arr in enumerate(patterns):
         map = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,\
                   urcrnrlon=lonmax,resolution='l',area_thresh=area_thresh)
         xi, yi = map(lon,lat)
-        plotloc = place
-        ax = fig.add_subplot(9,5,plotloc)
+        plotloc = (i+1)+((place-1)*9)
+        ax = fig.add_subplot(5,9,plotloc)
         if i == 0:
-            ax.set_title(f'Day {place-5}',fontsize=8.5,fontweight="bold",pad=2)
+            ax.set_ylabel(f'Day {place-5}',fontsize=8.5,fontweight="bold",labelpad=0.3)
         sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
         # ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
         #     fontsize=10, fontweight='bold', verticalalignment='top', 
         #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-        if place in range(5,51,5):
+        if place == 5:
             if len(perc_assigned) == 4:
-                ax.text(x=0.605, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+                ax.text(x=0.735, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
                     fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
                     bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
             else:
-                ax.text(x=0.655, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+                ax.text(x=0.775, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
                     fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
                     bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
-        if place in range(1,46,5):
-            ax.set_ylabel(f'{i+1}',fontsize=10,fontweight="bold",labelpad=5,rotation=0)
+        if place == 1:
+            ax.set_title(f'{i+1}',fontsize=10,fontweight="bold",pad=2)
+
         # ax.text(x=0.75, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
         #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
         #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
@@ -151,14 +151,14 @@ for i, arr in enumerate(patterns):
         map.drawcountries(color=border_c, linewidth=border_w)
         gridlinefont = 8.5
         parallels = np.arange(20.,71.,20.)
-        meridians = np.arange(-160.,-109.,40.)
-        if place in range(5,51,5):
+        meridians = np.arange(-160.,-109.,20.)
+        if i == 8:
             map.drawparallels(parallels, labels=[0,1,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
             map.drawmeridians(meridians,color=border_c,linewidth=border_w)
-            if place == 45:
+            if place == 5:
                 map.drawparallels(parallels, labels=[0,1,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
                 map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
-        elif i == 8:
+        elif place == 5:
             map.drawparallels(parallels, color=border_c,linewidth=border_w)
             map.drawmeridians(meridians, labels=[0,0,0,1], fontsize=gridlinefont,color=border_c,linewidth=border_w)
         # elif i == 6:
@@ -181,12 +181,10 @@ for i, arr in enumerate(patterns):
         place +=1
     
 #CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.03,right=0.95,bottom=0.06, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
+fig.subplots_adjust(left=0.01,right=0.945,bottom=0.02, top=0.98,hspace=0.05, wspace=0.05) #bottom colorbar
 #fig.add_axis([left,bottom, width,height])
-cbar_ax = fig.add_axes([0.05,0.035,0.9,0.015]) #bottom colorbar
-cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='horizontal')
-# cbar_ax = fig.add_axes([0.965,0.05,0.01,0.9]) #bottom colorbar
-# cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='vertical')
+cbar_ax = fig.add_axes([0.965,0.05,0.01,0.9]) #bottom colorbar
+cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='vertical')
 cbar.ax.tick_params(labelsize=8)
 cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
 
@@ -194,5 +192,5 @@ cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
 os.chdir(save_dir)
-plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d.png',dpi=300)
+plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d_horiz.png',dpi=300)
 plt.show()
