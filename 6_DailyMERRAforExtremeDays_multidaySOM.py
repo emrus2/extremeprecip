@@ -10,7 +10,7 @@ Creates file of MERRA-2 extreme precipitation days and
     the three days prior to each extreme day
 
 Saved files:
-    'MERRA2_IVT_Yuba_Extremes_Daily_1980-2021_WINTERDIST_4d.nc'
+    'MERRA2_IVT_Yuba_Extremes_Daily_1980-2021_WINTERDIST_5d.nc'
 
 
 UPDATED 4/30/2023
@@ -87,7 +87,7 @@ for date in extremedates:
     # should be 801 days
 #%% DEFINE EXTREME MERRA2 FILES
 #define files of interest
-metvars = ['IVT']
+metvars = ['Z500','850T','Z850','850W']
 metpath = {'Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressure_3hourly','IVT':'IVT_daily', \
                '300W':'East_and_North_wind_components_at_300_hPa','850T':'Temperature_at_850_hPa_3hourly', \
                    'Z850':'850_hPa_Geopotential_Height_3hourly','850W':'East_and_North_wind_components_at_850_hPa'}
@@ -133,7 +133,7 @@ for metvar in metvars:
     #total_means.to_netcdf(savefile2)
     
     #%% SAVE LIST OF SUCCEEDING EXTREME DAYS
-    np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDays_{daysprior+1}d.npy',np.array(extremedatesprior))
+    # np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDays_{daysprior+1}d.npy',np.array(extremedatesprior))
 
 #%% CALCULATE AVERAGE OF FOLDER
 # import os

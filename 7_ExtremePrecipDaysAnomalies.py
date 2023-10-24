@@ -22,9 +22,10 @@ os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj
 metvar = '850T'
 merravar = {'Z500':'H','SLP':'SLP','850T':'T'}
 percentile = 90
+clusters = 5
 
 folderpath = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}'
-filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
+filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{clusters}d.nc'
 filepath = os.path.join(folderpath,filename)
 
 #COLLECT VARIABLE DATA FROM MERRA2 FILE
@@ -47,4 +48,4 @@ merra = merraanom / climstd
 
 merra = np.array(merra)
 os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}')
-np.save(f'MERRA2_{metvar}Anom_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated',merra)
+np.save(f'MERRA2_{metvar}Anom_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{clusters}d',merra)

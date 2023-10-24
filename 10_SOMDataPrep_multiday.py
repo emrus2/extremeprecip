@@ -140,4 +140,7 @@ for j,event in enumerate(extremeevents):
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomInput'
 os.chdir(mat_dir)
 datadict = {'lat': gridlatreduced, 'lon': gridlonreduced, 'merra': alldata}
-scipy.io.savemat(f'{metvar}_{percentile}_data_{clusters}d.mat', mdict = datadict)
+# scipy.io.savemat(f'{metvar}_{percentile}_data_{clusters}d.mat', mdict = datadict)
+
+# save list of extreme events
+np.save(f'ExtremeEvents_{clusters}d.npy',extremeevents)

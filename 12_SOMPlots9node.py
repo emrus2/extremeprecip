@@ -211,7 +211,7 @@ cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
 
     
 #SHOW MAP
-save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
+save_dir='I:\\{your}'
 os.chdir(save_dir)
-plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM.png',dpi=300)
+# plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM.png',dpi=300)
 plt.show()
