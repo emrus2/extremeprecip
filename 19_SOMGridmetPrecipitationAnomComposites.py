@@ -18,13 +18,16 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 #from datetime import datetime, timedelta
-#from matplotlib.colors import ListedColormap
+from matplotlib.colors import LinearSegmentedColormap
 #import matplotlib.cm as cm
 import matplotlib.transforms as mtransforms
+import matplotlib.colors.LinearSegmentedColormap as colorm
 os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj")
 from mpl_toolkits.basemap import Basemap #installed using 
     #conda install -c anaconda basemap
-#import scipy.io
+from palettable.cmocean.sequential import Ice_20_r,Tempo_20
+from palettable.scientific.sequential import Batlow_20_r,Devon_20_r
+import scipy.io
 
 #%% DEFINE WATERSHED SHAPEFILE
 watershed = 'UpperYuba'
@@ -36,9 +39,17 @@ IVT = True
 # change directory and import SOM data from .mat file
 numpatterns = 9
 percentile = 90
-pats_assignments = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_ExtremeDaysand{numpatterns}NodeAssign.npy')
-assignment = pats_assignments[:,0]
-assignment = [float(x) for x in assignment]
+clusters = 5
+
+# load in SOM data
+mat_dir='I:\\Emma\\FIROWatersheds\\Data'
+os.chdir(mat_dir)
+soms = scipy.io.loadmat(f'SOMs\\SomOutput\\IVT_{percentile}_{numpatterns}sompatterns_{clusters}d.mat')
+asn_err = np.squeeze(soms['assignment'])
+assignment = asn_err[:,0]
+
+
+# assignment = [float(x) for x in assignment]
 
 # define lat, lon region of data for plotting
 latmin, latmax = (37.5,41.5)
@@ -184,8 +195,10 @@ fig = plt.figure(figsize=(7.2,5))
 #fig.suptitle('Precipitation Composites',fontsize=13,fontweight="bold",y=0.9875)
 
 lowlim = 3.3
-highlim = 18.4
-colormap = 'gist_ncar_r'
+highlim = 18
+
+colors = ['lightyellow',"yellow",'greenyellow',"limegreen","lightseagreen",'royalblue','mediumblue','#7400E0','#B800E0','#E0ADB1'] #,'mediumorchid','#A600E0','pink']
+colormap = LinearSegmentedColormap.from_list("mycmap", colors)
 
 for i, arr in enumerate(som_composites):
     #MAP DESIRED VARIABLE
@@ -200,7 +213,7 @@ for i, arr in enumerate(som_composites):
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     ax.text(0.0, 1.0, i+1, transform=ax.transAxes + sublabel_loc,
         fontsize=10, fontweight='bold', verticalalignment='top', 
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
+        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=11)
     #create colormap of MERRA2 data
     colorm = map.pcolor(xi,yi,arr,shading='auto',cmap=colormap,vmin=lowlim,vmax=highlim,zorder=1)
     
@@ -240,21 +253,23 @@ for i, arr in enumerate(som_composites):
         xim, yim = map(lonm,latm)
         #vectorm = map.quiver(xi2[skip],yi2[skip],U_arrs[skip],V_arrs[skip],color='darkgreen')
         vectorm = map.quiver(xim[skip],yim[skip],U_arrs[skip],V_arrs[skip],pivot='mid', \
-                             scale=size, scale_units='inches',headlength=5,headwidth=3,color='b',width=0.007,alpha=0.7)
+                             scale=size, scale_units='inches',headlength=5,headwidth=3, \
+                                 color='k',width=0.007,alpha=0.7,zorder=10)
 
     #create contour map
     #contourm = map.contour(xi,yi,arr,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]),zorder=2)
     #plt.clabel(contourm,levels=contourm.levels[::2],fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
         
     #add yuba shape
-    map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed)
+    # map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed)
+    map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,color='k',linewidth=0.6)
     #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
     
 #CUSTOMIZE SUBPLOT SPACING
 fig.subplots_adjust(left=0.05,right=0.9,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
 #fig.add_axis([left,bottom, width,height])
 cbar_ax = fig.add_axes([0.91,0.05,0.025,0.9]) #bottom colorbar
-cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(4,highlim,2),orientation='vertical')
+cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(4,highlim+1,2),orientation='vertical')
 cbar.ax.tick_params(labelsize=8)
 cbar.set_label('Proportion of Monthly Average',fontsize=8.5,labelpad=0.5,fontweight='bold')
 
@@ -263,7 +278,7 @@ cbar.set_label('Proportion of Monthly Average',fontsize=8.5,labelpad=0.5,fontwei
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
 os.chdir(save_dir)
 if IVT == True:
-    plt.savefig('GRIMET_PrecipitiationMonthlyProportion_IVT_SOM_composite.png',dpi=300)
+    plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_IVT_SOM_composite_{clusters}d.png',dpi=300)
 else:
-    plt.savefig('GRIMET_PrecipitiationMonthlyProportion_SOM_composite.png',dpi=300)
+    plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_SOM_composite_{clusters}d.png',dpi=300)
 plt.show()

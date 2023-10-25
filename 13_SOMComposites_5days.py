@@ -56,7 +56,7 @@ lonmin, lonmax = (-170.25,-105.75)
 #%% IMPORT MERRA2 DATA
 # define metvar
 metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850T','850TAnom']
-metvar = '850W'
+metvar = 'IVT'
 os.chdir('I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2')
 #metvar = '300W'
 
