@@ -32,63 +32,64 @@ import scipy.io
 metvar = 'IVT'
 numpatterns = 9
 percentile = 90
+clusters = 5
 
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
-soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}_sompatterns.mat')
+soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}sompatterns_{clusters}d.mat')
 pat_prop = np.squeeze(soms['pat_prop'])
 #%% IMPORT HISTOGRAM DATA
-data = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignMonthlyHistogram.npy')
+data = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignMonthlyHistogram_{clusters}d.npy')
 #data[data == 0] = 'nan'
 
-#%% CLUSTERED BAR CHART - 12 NODE
-if numpatterns == 12:
-    months = ("October", "November", "December", "January", "February", "March")
-    colors = ('orangered','indianred','gold','lightgreen','mediumseagreen','olive','cornflowerblue','royalblue','plum','darkorchid','magenta','slategrey')
+# #%% CLUSTERED BAR CHART - 12 NODE
+# if numpatterns == 12:
+#     months = ("October", "November", "December", "January", "February", "March")
+#     colors = ('orangered','indianred','gold','lightgreen','mediumseagreen','olive','cornflowerblue','royalblue','plum','darkorchid','magenta','slategrey')
     
-    if percentile == 95:
-        ymax = 10
-        yint = 2
-    elif percentile == 90:
-        ymax = 13
-        yint = 3
+#     if percentile == 95:
+#         ymax = 10
+#         yint = 2
+#     elif percentile == 90:
+#         ymax = 13
+#         yint = 3
         
-    x = np.arange(len(months))  # the label locations
-    width = 0.2  # the width of the bars
-    multiplier = 1
+#     x = np.arange(len(months))  # the label locations
+#     width = 0.2  # the width of the bars
+#     multiplier = 1
     
-    fig, ax = plt.subplots(layout='constrained')
+#     fig, ax = plt.subplots(layout='constrained')
         
-    for i, node in enumerate(data):
-        offset = width * multiplier
-        rects = ax.bar(x + offset, node, width, label=i+1,align='center',color=colors[i])
-        #ax.bar_label(rects, padding=3)
-        multiplier += 1
+#     for i, node in enumerate(data):
+#         offset = width * multiplier
+#         rects = ax.bar(x + offset, node, width, label=i+1,align='center',color=colors[i])
+#         #ax.bar_label(rects, padding=3)
+#         multiplier += 1
     
-    # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel('Days',fontweight='bold')
-    ax.set_xlabel('Month',fontweight='bold')
-    #ax.set_title('Node Frequency',fontweight='bold')
-    ax.set_xticks(x + width + 0.2, months)
-    ax.legend(loc='upper left', ncols=2)
-    ax.set_ylim(0, ymax)
+#     # Add some text for labels, title and custom x-axis tick labels, etc.
+#     ax.set_ylabel('Days',fontweight='bold')
+#     ax.set_xlabel('Month',fontweight='bold')
+#     #ax.set_title('Node Frequency',fontweight='bold')
+#     ax.set_xticks(x + width + 0.2, months)
+#     ax.legend(loc='upper left', ncols=2)
+#     ax.set_ylim(0, ymax)
     
-    save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
-    os.chdir(save_dir)
-    plt.savefig(f'{percentile}_{numpatterns}_NodeFreqMonthly.png',dpi=300,bbox_inches='tight',pad_inches=0.08)
-    plt.show()
+#     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
+#     os.chdir(save_dir)
+#     plt.savefig(f'{percentile}_{numpatterns}_NodeFreqMonthly_{clusters}d.png',dpi=300,bbox_inches='tight',pad_inches=0.08)
+#     plt.show()
 
 #%% CLUSTERED BAR CHART - 9 NODE
 if numpatterns == 9:
     months = ("October", "November", "December", "January", "February", "March")
     colors = ('tomato','indianred','gold','lightgreen','mediumseagreen','cornflowerblue','royalblue','plum','darkorchid','magenta',)
     
-    if percentile == 95:
-        ymax = 10
-        yint = 2
-    elif percentile == 90:
+    if clusters == 1:
         ymax = 19
+        yint = 2
+    elif clusters == 5:
+        ymax = 15
         yint = 2
     
     x = np.arange(len(months))  # the label locations
@@ -115,5 +116,5 @@ if numpatterns == 9:
     
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
     os.chdir(save_dir)
-    plt.savefig(f'{percentile}_{numpatterns}_NodeFreqMonthly.png',dpi=300,bbox_inches='tight',pad_inches=0.08)
+    plt.savefig(f'{percentile}_{numpatterns}_NodeFreqMonthly_{clusters}d.png',dpi=300,bbox_inches='tight',pad_inches=0.08)
     plt.show()

@@ -29,21 +29,22 @@ import scipy.io
 metvar = 'IVT'
 numpatterns = 9
 percentile = 90
+clusters = 5
 
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
-soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}_sompatterns.mat')
+soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}sompatterns_{clusters}d.mat')
 pat_prop = np.squeeze(soms['pat_prop'])
 pat_freq = np.squeeze(soms['pat_freq'])
 #%% IMPORT AVERAGE PRECIP DATA
-avgprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip.npy')
+avgprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip_{clusters}d.npy')
 avgprecip_rounded = np.round(a=avgprecip,decimals=1)
 
-medprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignMedianPrecip.npy')
+medprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignMedianPrecip_{clusters}d.npy')
 medprecip_rounded = np.round(a=medprecip,decimals=1)
 
-allprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAllPrecip.npy',allow_pickle=True)
+allprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAllPrecip_{clusters}d.npy',allow_pickle=True)
 #%% SUBPLOTS OF NODES
 
 #months = ("O", "N", "D", "J", "F", "M")
@@ -59,18 +60,18 @@ multiplier = 0
 fig = plt.figure(figsize=(7.2,5))
 #fig.suptitle('Node Precipitation',fontsize=13,fontweight="bold",y=0.9875)
 
-if percentile == 95:
-    ymin = 0
-    ymax = 11
-    yint = 2
-elif percentile == 90:
-    xmin = 45 
-    xmax = 215
-    xint = 25
-    ymin = 0
+if clusters == 1:
     ymax = 17.5
     yint = 3
-    
+elif clusters == 5:
+    ymax = 20
+    yint = 4
+   
+ymin = 0
+xmin = 45 
+xmax = 215
+xint = 25
+
 ylabels = np.arange(ymin,ymax-1,yint)
 xlabels = np.arange(xmin+5,xmax,xint)
 
@@ -137,5 +138,5 @@ fig.subplots_adjust(left=0.065,right=0.985,bottom=0.082, top=0.985,hspace=0.05, 
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
 os.chdir(save_dir)
-plt.savefig(f'{percentile}_{numpatterns}_PrecipbyNode.png',dpi=300)
+plt.savefig(f'{percentile}_{numpatterns}_PrecipbyNode_{clusters}d.png',dpi=300)
 plt.show()

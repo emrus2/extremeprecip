@@ -23,11 +23,12 @@ import scipy.io
 #%% IMPORT SOM DATA
 numpatterns = 9
 percentile = 90
+clusters = 5
 
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
-soms = scipy.io.loadmat(f'IVT_{percentile}_{numpatterns}_sompatterns.mat')
+soms = scipy.io.loadmat(f'IVT_{percentile}_{numpatterns}sompatterns_{clusters}d.mat')
 asn_err = np.squeeze(soms['assignment'])
 assignment = asn_err[:,0]
 
@@ -52,10 +53,15 @@ for som in range(numpatterns):
     soms_averageprecip.append(som_average)
     soms_medianprecip.append(som_median)
     
-soms_allprecip = np.array(soms_allprecip)
-
+# create numpy array for all precipitation values
+arr_size = (max(len(lst) for lst in soms_allprecip))
+allprecip_arr = np.empty((numpatterns,arr_size))
+allprecip_arr[:] = np.nan
+for i,j in enumerate(soms_allprecip):
+    allprecip_arr[i][0:len(j)] = j
+    
 #%% SAVE DATA
-#np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip.npy',soms_averageprecip)
-#np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAllPrecip.npy',soms_allprecip)
-
-np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignMedianPrecip.npy',soms_precip)
+os.chdir('I:\\Emma\\FIROWatersheds\\Data')
+np.save(f'{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip_{clusters}d.npy',soms_averageprecip)
+np.save(f'{percentile}Percentile_{numpatterns}NodeAssignMedianPrecip_{clusters}d.npy',soms_medianprecip)
+np.save(f'{percentile}Percentile_{numpatterns}NodeAssignAllPrecip_{clusters}d.npy',allprecip_arr)
