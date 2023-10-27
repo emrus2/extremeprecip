@@ -36,6 +36,9 @@ ds = xr.open_mfdataset(files,combine='nested',concat_dim="day")
 extremefile = 'I:\\Emma\\FIROWatersheds\\Data\\Gridmet\\GRIDMET_pr_Yuba_Extremes90_Daily_1980-2021_WINTERDIST.nc'
 extremes = xr.open_dataset(extremefile)
 
+data1 = ds.groupby('day.month').mean()
+smalldata = np.array(data1.precipitation_amount[0])
+data2 = extremes.groupby('day.month')
 
 anoms = extremes.groupby('day.month') / ds.groupby('day.month').mean()
 

@@ -18,23 +18,19 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 #from datetime import datetime, timedelta
-from matplotlib.colors import LinearSegmentedColormap
+#from matplotlib.colors import ListedColormap
 #import matplotlib.cm as cm
+from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.transforms as mtransforms
-import matplotlib.colors.LinearSegmentedColormap as colorm
 os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj")
 from mpl_toolkits.basemap import Basemap #installed using 
     #conda install -c anaconda basemap
-from palettable.cmocean.sequential import Ice_20_r,Tempo_20
-from palettable.scientific.sequential import Batlow_20_r,Devon_20_r
 import scipy.io
 
 #%% DEFINE WATERSHED SHAPEFILE
 watershed = 'UpperYuba'
 ws_directory = f'I:\\Emma\\FIROWatersheds\\Data\\WatershedShapefiles\\California\\{watershed}\\'
 
-# determine if you want to plot IVT data
-IVT = True
 #%% IMPORT SOM AND GRIDMET DATA
 # change directory and import SOM data from .mat file
 numpatterns = 9
@@ -49,15 +45,13 @@ asn_err = np.squeeze(soms['assignment'])
 assignment = asn_err[:,0]
 
 
-# assignment = [float(x) for x in assignment]
-
 # define lat, lon region of data for plotting
 latmin, latmax = (37.5,41.5)
 lonmin, lonmax = (-124.5,-119.5)
 #%%
 #IMPORT NETCDF DATA
 #define NC location
-filepath = ('I:\\Emma\\FIROWatersheds\\Data\\Gridmet\\GRIDMET_pr_Yuba_Extremes90_DailyAnomProp_1980-2021_WINTERDIST.nc')
+filepath = ('I:\\Emma\\FIROWatersheds\\Data\\Gridmet\\GRIDMET_pr_Yuba_Extremes90_Daily_1980-2021_WINTERDIST.nc')
 #open the netcdf file in read mode
 gridfile = nc.Dataset(filepath,mode='r')
 print(gridfile)
@@ -112,8 +106,6 @@ for som in range(numpatterns):
 zmax = 0
 zmin = 1E8
 
-som_composites[som_composites==0.] = np.nan
-
 for i, arr in enumerate(som_composites):
     
     #determine zmax and zmin for all days
@@ -127,77 +119,15 @@ for i, arr in enumerate(som_composites):
 
 print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
 
-#%%
-if IVT == True:
-    # IMPORT MERRA2 DATA
-    metvar = 'IVT'
-    merrapath = f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}'
-    merraname = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST.nc'
-    merrafile = os.path.join(merrapath,merraname)
-
-    gridmerra = nc.Dataset(merrafile,mode='r')
-    print(gridmerra)
-    gridlatm = gridmerra.variables['lat'][:]
-    gridlonm = gridmerra.variables['lon'][:]
-    Uvapor = gridmerra.variables['UFLXQV'][:]
-    Vvapor = gridmerra.variables['VFLXQV'][:]
-    merra = np.sqrt(Uvapor**2 + Vvapor**2)
-    gridmerra.close()
-
-    #INCLUDE CALCULATION OF IVT VECTORS
-    latlimsm = np.logical_and(gridlatm > latmin, gridlatm < latmax)
-    latindm = np.where(latlimsm)[0]
-    latreducedm = gridlatm[latindm]
-    #reduce lon
-    lonlimsm = np.logical_and(gridlonm > lonmin, gridlonm < lonmax)
-    lonindm = np.where(lonlimsm)[0]
-    lonreducedm = gridlonm[lonindm]
-    #reduce pressure
-    Uvaporreduced = Uvapor[:,latindm,:]
-    Uvaporreduced = Uvaporreduced[:,:,lonindm]
-    Vvaporreduced = Vvapor[:,latindm,:]
-    Vvaporreduced = Vvaporreduced[:,:,lonindm]
-
-    lonm, latm = np.meshgrid(lonreducedm,latreducedm)
-
-    # create array to store 12 SOM composites
-    U_composites = np.zeros((numpatterns,len(latreducedm),len(lonreducedm)))
-    V_composites = np.zeros((numpatterns,len(latreducedm),len(lonreducedm)))
-    # loop through all 12 som patterns
-    for som in range(numpatterns):
-        # create array to store assigned days data
-        U_merra = np.zeros((1,len(latreducedm),len(lonreducedm)))
-        V_merra = np.zeros((1,len(latreducedm),len(lonreducedm)))
-        # loop through all days
-        for day,arr in enumerate(merrareduced):
-            U_array = Uvaporreduced[day,:,:]
-            V_array = Vvaporreduced[day,:,:]
-            # add data to som_merra if day is assigned to node
-            if assignment[day] == float(som + 1):
-                U_merra = np.concatenate((U_merra,np.expand_dims(U_array,axis=0)))
-                V_merra = np.concatenate((V_merra,np.expand_dims(V_array,axis=0)))
-        # remove initial row of zeros
-        U_merra = U_merra[1:,:,:]
-        V_merra = V_merra[1:,:,:]
-        # confirm correct number of days assigned to node
-        #print(som+1,len(U_merra),pat_freq[som])
-        # calculate the mean of assigned days
-        U_mean = np.squeeze(np.mean(U_merra,axis=0))
-        V_mean = np.squeeze(np.mean(V_merra,axis=0))
-        # append to array of composites
-        U_composites[som] = U_mean
-        V_composites[som] = V_mean
-
 #%% PLOT NODES from MATLAB
 
 #create subplot for mapping multiple timesteps
 fig = plt.figure(figsize=(7.2,5))
-#fig.suptitle('Precipitation Composites',fontsize=13,fontweight="bold",y=0.9875)
+# fig.suptitle('Precipitation Composites',fontsize=13,fontweight="bold",y=0.9875)
 
-lowlim = 3.3
-highlim = 18
-
-colors = ['lightyellow',"yellow",'greenyellow',"limegreen","lightseagreen",'royalblue','mediumblue','#7400E0','#B800E0','#E0ADB1'] #,'mediumorchid','#A600E0','pink']
+lowlim = 0
+highlim = 155
+colors = ['white',"yellow",'greenyellow',"limegreen","lightseagreen",'royalblue','mediumblue','#7400E0','#B800E0','#E0ADB1'] #,'mediumorchid','#A600E0','pink']
 colormap = LinearSegmentedColormap.from_list("mycmap", colors)
 
 for i, arr in enumerate(som_composites):
@@ -212,8 +142,8 @@ for i, arr in enumerate(som_composites):
     ax = fig.add_subplot(3,3,i+1)
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     ax.text(0.0, 1.0, i+1, transform=ax.transAxes + sublabel_loc,
-        fontsize=10, fontweight='bold', verticalalignment='top', 
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=11)
+        fontsize=9, fontweight='bold', verticalalignment='top', 
+        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
     #create colormap of MERRA2 data
     colorm = map.pcolor(xi,yi,arr,shading='auto',cmap=colormap,vmin=lowlim,vmax=highlim,zorder=1)
     
@@ -242,43 +172,25 @@ for i, arr in enumerate(som_composites):
     #define contour color and thickness
     contour_c = '0.1'
     contour_w = 0.7
-    
-    if IVT == True:
-        #plot IVT vectors
-        U_arrs = U_composites[i,:,:]
-        V_arrs = V_composites[i,:,:]
-        interval = 1
-        size = 1500
-        skip = (slice(None, None, interval), slice(None, None, interval))
-        xim, yim = map(lonm,latm)
-        #vectorm = map.quiver(xi2[skip],yi2[skip],U_arrs[skip],V_arrs[skip],color='darkgreen')
-        vectorm = map.quiver(xim[skip],yim[skip],U_arrs[skip],V_arrs[skip],pivot='mid', \
-                             scale=size, scale_units='inches',headlength=5,headwidth=3, \
-                                 color='k',width=0.007,alpha=0.7,zorder=10)
-
     #create contour map
     #contourm = map.contour(xi,yi,arr,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]),zorder=2)
     #plt.clabel(contourm,levels=contourm.levels[::2],fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
         
     #add yuba shape
-    # map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed)
-    map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,color='k',linewidth=0.6)
+    map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed)
     #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
     
 #CUSTOMIZE SUBPLOT SPACING
 fig.subplots_adjust(left=0.05,right=0.9,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
 #fig.add_axis([left,bottom, width,height])
 cbar_ax = fig.add_axes([0.91,0.05,0.025,0.9]) #bottom colorbar
-cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(4,highlim+1,2),orientation='vertical')
+cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(0,highlim+1,25),orientation='vertical')
 cbar.ax.tick_params(labelsize=8)
-cbar.set_label('Proportion of Monthly Average',fontsize=8.5,labelpad=0.5,fontweight='bold')
+cbar.set_label('mm',fontsize=8.5,labelpad=0.5,fontweight='bold')
 
     
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
 os.chdir(save_dir)
-if IVT == True:
-    plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_IVT_SOM_composite_{clusters}d.png',dpi=300)
-else:
-    plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_SOM_composite_{clusters}d.png',dpi=300)
+plt.savefig(f'GRIMET_pr_SOMcomposite_{clusters}d.png',dpi=300)
 plt.show()

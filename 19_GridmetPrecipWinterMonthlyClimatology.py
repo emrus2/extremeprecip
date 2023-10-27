@@ -8,7 +8,6 @@ Created on Fri December 9 15:27:00 2022
 Description: This script calculates the mean geopotential height for the OCT-MAR
 climatological period for geopotential height
 
-Final result is two .nc files, one for mean and another for standard deviation of values
 
 UPDATED 07/11/2023
 
