@@ -21,7 +21,7 @@ os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj
 import scipy.io
 
 #%% IMPORT SOM DATA
-numpatterns = 9
+numpatterns = 12
 percentile = 90
 clusters = 5
 

@@ -170,7 +170,7 @@ import scipy.io
 
 # define metvar
 metvar = 'IVT'
-numpatterns = 9
+numpatterns = 12
 percentile = 90
 daysprior = 4
 clusters = daysprior + 1
@@ -294,4 +294,5 @@ gridlon = np.squeeze(soms['lon'])
 # np.save(f'Sammon_{clusters}d_test.npy',y)
 
 sam = sammon(patterns,n=2)
-np.save(f'Sammon_{clusters}d_test.npy',sam)
+savesam = sam[0]
+np.save(f'Sammon{numpatterns}_{clusters}d_test.npy',savesam)

@@ -50,7 +50,7 @@ latmin, latmax = (15.5,65.5)
 lonmin, lonmax = (-170.25,-105.75)
 
 #%% IMPORT AVERAGE PRECIP DATA
-precip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip.npy')
+precip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip_{clusters}d.npy')
 precip_rounded = np.round(a=precip,decimals=1)
 
 #%% DETERMINE MAX AND MIN VALIUES
@@ -87,7 +87,7 @@ plottitle = {'Z500':'Z500','SLP':'SLP','IVT':'IVT','300W':'300 hPa Wind','850T':
 #%% PLOT NODES from MATLAB
 
 #create subplot for mapping multiple timesteps
-fig = plt.figure(figsize=(20,7.8))
+fig = plt.figure(figsize=(25,7.8))
 #fig.suptitle(f'{plottitle[metvar]} SOMs',fontsize=13,fontweight="bold",y=0.9875)
 for i, arr in enumerate(patterns):
     place = 1
@@ -96,10 +96,14 @@ for i, arr in enumerate(patterns):
     # define percentage of node assignment
     perc_assigned = str(round(pat_prop[i]*100,1))
     # define average precip
-    #precipavg = precip_rounded[i]
-    #patfreq_col = str(1 / (pat_freq[i]/17))
-    gbcolor = 1.1-(pat_freq[i]/44)
-    patfreq_col = (1,gbcolor,gbcolor)
+    precipavg = precip_rounded[i]
+    # define precip colors
+    precipavgnorm = 0.8-(((precipavg-min(precip_rounded))/(max(precip_rounded)+7-min(precip_rounded))))
+    precip_col = (precipavgnorm,1.0,precipavgnorm)
+    # define frequency colors
+    freqnorm = 0.8-(((pat_freq[i]-min(pat_freq))/(max(pat_freq)+7-min(pat_freq))))
+    patfreq_col = (1,freqnorm,freqnorm)
+    
     #MAP DESIRED VARIABLE
     for j in range(len(merrareduced)):
         merraplot = merrareduced[j]
@@ -114,22 +118,24 @@ for i, arr in enumerate(patterns):
         plotloc = (i+1)+((place-1)*numpatterns)
         ax = fig.add_subplot(clusters,numpatterns,plotloc)
         if i == 0:
-            ax.set_ylabel(f'Day {place-5}',fontsize=8.5,fontweight="bold",labelpad=0.3)
+            ax.set_ylabel(f'Day {place-5}',fontsize=10,fontweight="bold",labelpad=0.3)
         sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
         # ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
         #     fontsize=10, fontweight='bold', verticalalignment='top', 
         #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
         if place == 5:
             if len(perc_assigned) == 4:
-                ax.text(x=0.735, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-                    fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
-                    bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
+                xloc = 0.710
             else:
-                ax.text(x=0.775, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-                    fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
-                    bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
+                xloc = 0.755
+            ax.text(x=0.005, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
+                fontsize=9, fontweight='bold', verticalalignment='top', color = 'k',
+                bbox=dict(facecolor=precip_col, edgecolor='none', pad=1.5),zorder=3)
+            ax.text(x=xloc, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+                fontsize=9, fontweight='bold',verticalalignment='top', color = 'k',
+                bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
         if place == 1:
-            ax.set_title(f'{i+1}',fontsize=10,fontweight="bold",pad=2)
+            ax.set_title(f'{i+1}',fontsize=12,fontweight="bold",pad=2)
 
         # ax.text(x=0.75, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
         #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
@@ -149,10 +155,10 @@ for i, arr in enumerate(patterns):
         map.drawcoastlines(color=border_c, linewidth=border_w)
         map.drawstates(color=border_c, linewidth=border_w)
         map.drawcountries(color=border_c, linewidth=border_w)
-        gridlinefont = 8.5
+        gridlinefont = 9
         parallels = np.arange(20.,71.,20.)
         meridians = np.arange(-160.,-109.,20.)
-        if i == 8:
+        if i == 11:
             map.drawparallels(parallels, labels=[0,1,0,0], fontsize=gridlinefont,color=border_c,linewidth=border_w)
             map.drawmeridians(meridians,color=border_c,linewidth=border_w)
             if place == 5:
@@ -181,12 +187,12 @@ for i, arr in enumerate(patterns):
         place +=1
     
 #CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.01,right=0.945,bottom=0.02, top=0.98,hspace=0.05, wspace=0.05) #bottom colorbar
+fig.subplots_adjust(left=0.01,right=0.95,bottom=0.02, top=0.978,hspace=0.05, wspace=0.05) #bottom colorbar
 #fig.add_axis([left,bottom, width,height])
 cbar_ax = fig.add_axes([0.965,0.05,0.01,0.9]) #bottom colorbar
 cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='vertical')
-cbar.ax.tick_params(labelsize=8)
-cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
+cbar.ax.tick_params(labelsize=9)
+cbar.set_label(cbarlabs[metvar],fontsize=9.5,labelpad=0.5,fontweight='bold')
 
     
 #SHOW MAP

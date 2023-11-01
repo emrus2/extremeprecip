@@ -50,7 +50,7 @@ latmin, latmax = (15.5,65.5)
 lonmin, lonmax = (-170.25,-105.75)
 
 #%% IMPORT AVERAGE PRECIP DATA
-precip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip.npy')
+precip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip_{clusters}d.npy')
 precip_rounded = np.round(a=precip,decimals=1)
 
 #%% DETERMINE MAX AND MIN VALIUES
@@ -96,10 +96,14 @@ for i, arr in enumerate(patterns):
     # define percentage of node assignment
     perc_assigned = str(round(pat_prop[i]*100,1))
     # define average precip
-    #precipavg = precip_rounded[i]
-    #patfreq_col = str(1 / (pat_freq[i]/17))
-    gbcolor = 1.1-(pat_freq[i]/44)
-    patfreq_col = (1,gbcolor,gbcolor)
+    precipavg = precip_rounded[i]
+    # define precip colors
+    precipavgnorm = 0.8-(((precipavg-min(precip_rounded))/(max(precip_rounded)+7-min(precip_rounded))))
+    precip_col = (precipavgnorm,1,precipavgnorm)
+    # define frequency colors
+    freqnorm = 0.8-(((pat_freq[i]-min(pat_freq))/(max(pat_freq)+7-min(pat_freq))))
+    patfreq_col = (1,freqnorm,freqnorm)
+    
     #MAP DESIRED VARIABLE
     for j in range(len(merrareduced)):
         merraplot = merrareduced[j]
@@ -121,13 +125,15 @@ for i, arr in enumerate(patterns):
         #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
         if place == 5:
             if len(perc_assigned) == 4:
-                ax.text(x=0.735, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-                    fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
-                    bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
+                xloc = 0.710
             else:
-                ax.text(x=0.775, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-                    fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
-                    bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
+                xloc = 0.755
+            ax.text(x=0.005, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
+                fontsize=9, fontweight='bold', verticalalignment='top', color = 'k',
+                bbox=dict(facecolor=precip_col, edgecolor='none', pad=1.5),zorder=3)
+            ax.text(x=xloc, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
+                fontsize=9, fontweight='bold',verticalalignment='top', color = 'k',
+                bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
         if place == 1:
             ax.set_title(f'{i+1}',fontsize=10,fontweight="bold",pad=2)
 
