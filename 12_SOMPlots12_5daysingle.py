@@ -25,17 +25,6 @@ import scipy.io
 #define watershed and directory for plotting
 watershed = 'UpperYuba'
 ws_directory = f'I:\\Emma\\FIROWatersheds\\Data\\WatershedShapefiles\\California\\{watershed}\\'
-
-#GENERATE CUSTOM COLORMAP
-def center_colormap(lowlim, highlim, center=0):
-    dv = max(-lowlim, highlim) * 2
-    N = int(256 * dv / (highlim-lowlim))
-    bwr = cm.get_cmap('seismic', N)
-    newcolors = bwr(np.linspace(0, 1, N))
-    beg = int((dv / 2 + lowlim)*N / dv)
-    end = N - int((dv / 2 - highlim)*N / dv)
-    newmap = ListedColormap(newcolors[beg:end])
-    return newmap
 #%% IMPORT SOM DATA
 
 # define metvar
@@ -56,14 +45,8 @@ gridlat = np.squeeze(soms['lat'])
 gridlon = np.squeeze(soms['lon'])
 
 # define lat, lon region of data for plotting
-#latmin, latmax = (20.5,70.5)
-#lonmin, lonmax = (-170.25,-105.75)
-#latmin, latmax = (20.5,60.5)
 latmin, latmax = (15.5,65.5)
 lonmin, lonmax = (-170.25,-105.75)
-
-if metvar == 'SLP':
-    patterns /= 100
 
 #%% IMPORT AVERAGE PRECIP DATA
 precip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip_{clusters}d.npy')
@@ -88,37 +71,18 @@ for i, arr in enumerate(patterns):
 
 print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
 #%%
-if metvar == 'Z500Anom':
-    lowanom, highanom = (-2.8, 1.8)
-    newmap = center_colormap(lowanom, highanom, center=0)
-else:
-    lowanom, highanom = (-3, 1.2)
-    newmap = center_colormap(lowanom, highanom, center=0)
-#%% DEFINE PLOTTING VARIABLES
-if metvar == 'Z500Anom':
-    lowanom, highanom = (-2.8, 1.8)
-    newmap = center_colormap(lowanom, highanom, center=0)
-else:
-    lowanom, highanom = (-3, 1.2)
-    newmap = center_colormap(lowanom, highanom, center=0)
-lowlims = {'Z500':2850,'SLP':640,'IVT':0,'300W':0,'850T':246,'Z500Anom':lowanom,'SLPAnom':lowanom}
-highlims = {'Z500':5700,'SLP':1000,'IVT':600,'300W':68,'850T':294,'Z500Anom':highanom,'SLPAnom':highanom}
-
-contourstart = {'Z500':3000,'SLP':650,'IVT':0,'300W':7,'850T':250,'Z500Anom':-2.75,'SLPAnom':-2.75}
-contourint = {'Z500':200,'SLP':50,'IVT':75,'300W':7,'850T':3,'Z500Anom':0.25,'SLPAnom':0.25}
-
-cbarstart = {'Z500':3000,'SLP':650,'IVT':0,'300W':0,'850T':250,'Z500Anom':-2.5,'SLPAnom':-3}
-cbarint = {'Z500':500,'SLP':50,'IVT':100,'300W':10,'850T':10,'Z500Anom':0.5,'SLPAnom':0.5}
-
-colormap = {'Z500':'jet','SLP':'rainbow','IVT':'gnuplot2_r','300W':'hot_r','850T':'turbo','Z500Anom':newmap,'SLPAnom':newmap}
-cbarlabs = {'Z500':'m','SLP':'hPa','IVT':'kg $\mathregular{m^{-1}}$ $\mathregular{s^{-1}}$','300W':'m/s','850T':'K','Z500Anom':r'$\mathbf{\sigma}$','SLPAnom':r'$\mathbf{\sigma}$'}
-plottitle = {'Z500':'Z500','SLP':'SLP','IVT':'IVT','300W':'300 hPa Wind','850T':'850 hPa Temperature','Z500Anom':'Z500 Anomaly','SLPAnom':'SLP Anomaly'}
+lowlims, highlims = (0,610)
+contourstart, contourint = (0,75)
+cbarstart, cbarint = (0,100)
+colormap = 'gnuplot2_r'
+cbarlabs = 'kg $\mathregular{m^{-1}}$ $\mathregular{s^{-1}}$'
+plottitle = metvar
 
 #%% PLOT NODES from MATLAB
 
 #create subplot for mapping multiple timesteps
 fig = plt.figure(figsize=(7.2,6.7))
-#fig.suptitle(f'{plottitle[metvar]} SOMs',fontsize=13,fontweight="bold",y=0.9875)
+#fig.suptitle(f'{plottitle} SOMs',fontsize=13,fontweight="bold",y=0.9875)
 
 for i, arr in enumerate(patterns):
     # reshape merra data for plotting
@@ -158,16 +122,9 @@ for i, arr in enumerate(patterns):
     ax.text(x=xloc, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
         fontsize=9, fontweight='bold',verticalalignment='top', color = 'k',
         bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
-    # ax.text(x=0.75, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-    #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
-    #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-    # ax.text(x=0.4, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
-    #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'blue',
-    #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-
 
     #create colormap of MERRA2 data
-    colorm = map.pcolor(xi,yi,merrareduced,shading='auto',cmap=colormap[metvar],vmin=lowlims[metvar],vmax=highlims[metvar],zorder=1)
+    colorm = map.pcolor(xi,yi,merrareduced,shading='auto',cmap=colormap,vmin=lowlims,vmax=highlims,zorder=1)
     
     #define border color and thickness
     border_c = '0.4'
@@ -195,12 +152,10 @@ for i, arr in enumerate(patterns):
     contour_c = '0.1'
     contour_w = 0.7
     #create contour map
-    contourm = map.contour(xi,yi,merrareduced,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]),zorder=2)
-    plt.clabel(contourm,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]*2),fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
+    contourm = map.contour(xi,yi,merrareduced,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart,highlims+1,contourint),zorder=2)
+    plt.clabel(contourm,levels=np.arange(contourstart,highlims+1,contourint*2),fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
         
     #add yuba shape
-    #map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,linewidth=0.8,color='w')
-    #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
     plt.scatter(-120.9,39.5,color='w',marker='*',linewidths=0.7,zorder=4)
 
     
@@ -208,13 +163,13 @@ for i, arr in enumerate(patterns):
 fig.subplots_adjust(left=0.05,right=0.9,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
 #fig.add_axis([left,bottom, width,height])
 cbar_ax = fig.add_axes([0.91,0.05,0.025,0.9]) #bottom colorbar
-cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1,cbarint[metvar]),orientation='vertical')
+cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart,highlims+1,cbarint),orientation='vertical')
 cbar.ax.tick_params(labelsize=8)
-cbar.set_label(cbarlabs[metvar],fontsize=8.5,labelpad=0.5,fontweight='bold')
+cbar.set_label(cbarlabs,fontsize=8.5,labelpad=0.5,fontweight='bold')
 
     
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
 os.chdir(save_dir)
-plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d_small.png',dpi=300)
+plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d_sm.png',dpi=300)
 plt.show()

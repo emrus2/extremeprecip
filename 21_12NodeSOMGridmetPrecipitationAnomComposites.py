@@ -193,8 +193,8 @@ if IVT == True:
 fig = plt.figure(figsize=(7.2,6.9))
 #fig.suptitle('Precipitation Composites',fontsize=13,fontweight="bold",y=0.9875)
 
-lowlim = 2.7
-highlim = 18.9
+lowlim = 2.8
+highlim = 18
 
 colors = ['lightyellow',"yellow",'greenyellow',"limegreen","lightseagreen",'royalblue','mediumblue','#7400E0','#B800E0','#E0ADB1'] #,'mediumorchid','#A600E0','pink']
 colormap = LinearSegmentedColormap.from_list("mycmap", colors)

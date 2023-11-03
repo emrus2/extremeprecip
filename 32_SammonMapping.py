@@ -61,12 +61,13 @@ elif numpatterns == 12:
     rightcorners = (450,-450)
     centers = ()
     for i in range(len(sammon)):
-        xannot = {0:X[i]+leftcorners[0],1:X[i]-100,2:X[i]+rightcorners[0],3:X[i]-1000, \
-                  4:X[i]+500,5:X[i]+450,6:X[i]-800,7:X[i]+600, \
-                  8:X[i]+rightcorners[0],9:X[i]-1400,10:X[i]+500,11:X[i]+rightcorners[0]}
-        yannot = {0:Y[i]+leftcorners[1],1:Y[i]-2000,2:Y[i]+rightcorners[1],3:Y[i]-500, \
-                  4:Y[i]+300,5:Y[i]-450,6:Y[i]+100,7:Y[i]+350, \
-                      8:Y[i]+rightcorners[1],9:Y[i]+leftcorners[1],10:Y[i]+350,11:Y[i]+rightcorners[1]}
+        xannot = {0:X[i]+leftcorners[0],1:X[i]+40,2:X[i]+rightcorners[0],3:X[i]-1000, \
+                  4:X[i]+350,5:X[i]+450,6:X[i]-800,7:X[i]+600, \
+                  8:X[i]+rightcorners[0]+70,9:X[i]-1400,10:X[i]+150,11:X[i]+rightcorners[0]}
+        yannot = {0:Y[i]+leftcorners[1],1:Y[i]-2000,2:Y[i]+rightcorners[1],3:Y[i]-850, \
+                  4:Y[i]+400,5:Y[i]-450,6:Y[i]+100,7:Y[i]+350, \
+                      8:Y[i]+rightcorners[1],9:Y[i]+leftcorners[1], \
+                          10:Y[i]+800,11:Y[i]+rightcorners[1]}
         ax.annotate(i+1,(xannot[i],yannot[i]))
         if i not in range(2,12,3):
             ax.plot(X[i:i+2],Y[i:i+2],color=col,linewidth=lw)
@@ -82,9 +83,9 @@ elif numpatterns == 12:
     for spine in ax.spines:
         ax.spines[spine].set_visible(False)
 
-    
+# plt.show()  
 #%%
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
 os.chdir(save_dir)
-plt.savefig(f'Sammon{numpatterns}_{clusters}d.png',dpi=300)
+plt.savefig(f'Sammon{numpatterns}_{clusters}d.png',dpi=300,transparent=True)
 plt.show()

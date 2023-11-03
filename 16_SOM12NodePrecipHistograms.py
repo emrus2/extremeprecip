@@ -30,7 +30,6 @@ metvar = 'IVT'
 numpatterns = 12
 percentile = 90
 clusters = 5
-cm = cm.Set3
 
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
@@ -51,10 +50,9 @@ allprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{nu
 #months = ("O", "N", "D", "J", "F", "M")
 #color = 'tomato'
 # colors = ('tomato','indianred','gold','lightgreen','mediumseagreen','olivedrab','cornflowerblue','royalblue','plum','darkorchid','magenta','slategrey','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta')
-colors = ('royalblue','tomato','plum','lightgreen','gold','cornflowerblue','indianred','slategrey','mediumseagreen','darkorchid','magenta','orange')
-colors = ('dodgerblue','gold','darkorchid','indianred','teal','orange','lightgreen','plum','grey','tomato','olivedrab','mediumslateblue')
+# colors = ('royalblue','tomato','plum','lightgreen','gold','cornflowerblue','indianred','slategrey','mediumseagreen','darkorchid','magenta','orange')
+# colors = ('dodgerblue','gold','darkorchid','indianred','teal','orange','lightgreen','plum','grey','tomato','olivedrab','mediumslateblue')
 colors = ('tomato','cornflowerblue','lightgreen','darkorchid','gold','lightblue','plum','mediumseagreen','indianred','royalblue','grey',(.9,0,.9))
-# colors = [plt.cm.Set3(i) for i in range(20)]
 
 binlist = [np.arange(50,240,10)]
 
@@ -98,9 +96,6 @@ for i,node in enumerate(allprecip):
     ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
         fontsize=10, fontweight='bold', verticalalignment='top',
         bbox=dict(facecolor='1', alpha = 0.8, edgecolor='none', pad=1.5),zorder=3)
-    # ax.text(x=0.77, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-    #     fontsize=9, fontweight='bold', verticalalignment='top', color = 'red',
-    #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
     ax.text(x=0.825, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
         fontsize=8, fontweight='bold', verticalalignment='top', color = 'k',
         bbox=dict(facecolor=precipavg_col, edgecolor='none', pad=1.5),zorder=3)

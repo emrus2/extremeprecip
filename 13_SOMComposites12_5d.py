@@ -56,7 +56,7 @@ lonmin, lonmax = (-170.25,-105.75)
 #%% IMPORT MERRA2 DATA
 # define metvar
 metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850W','850TAnom']
-metvars=['850W']
+# metvars=['850W']
 for metvar in metvars:
     os.chdir('I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2')
     #metvar = '300W'
@@ -237,13 +237,13 @@ for metvar in metvars:
     
     #%% DEFINE PLOTTING VARIABLES
     if metvar == 'Z500Anom':
-        lowanom, highanom = (-3.1, 2.3)
+        lowanom, highanom = (-3.2, 2.3)
         newmap = center_colormap(lowanom, highanom, center=0)
     elif metvar == 'SLPAnom':
-        lowanom, highanom = (-3.2, 1.8)
+        lowanom, highanom = (-3.55, 1.75)
         newmap = center_colormap(lowanom, highanom, center=0)
     elif metvar == '850TAnom':
-        lowanom, highanom = (-2.7, 1.8)
+        lowanom, highanom = (-2.7, 1.85)
         newmap = center_colormap(lowanom, highanom, center=0)
     elif metvar == '850QVECT':
         lowanom, highanom = (-600, 600)
@@ -252,15 +252,15 @@ for metvar in metvars:
         lowanom, highanom = (-0.4, 0.6)
         newmap = center_colormap(lowanom, highanom, center=0)
         
-    lowlims = {'Z500':2850,'SLP':976,'IVT':0,'300W':0,'850T':244, \
+    lowlims = {'Z500':2850,'SLP':975,'IVT':0,'300W':0,'850T':244, \
                'Z500Anom':lowanom, 'Z850':1114,'SLPAnom':lowanom, \
                '850TAnom':lowanom,'850TADV':lowanom,'850QVECT':lowanom, \
                '850W':0}
         
-    highlims = {'Z500':5700,'SLP':1034,'IVT':800,'300W':73,'850T':293, \
+    highlims = {'Z500':5700,'SLP':1034,'IVT':807,'300W':75,'850T':293, \
                 'Z500Anom':highanom,'Z850':1595,'SLPAnom':highanom, \
                 '850TAnom':highanom,'850TADV':highanom,'850QVECT':highanom, \
-                '850W':24}
+                '850W':25}
     
     contourstart = {'Z500':3000,'SLP':978,'IVT':0,'300W':4,'850T':250, \
                     'Z500Anom':-2.8,'Z850':1120,'SLPAnom':-2.8, \
@@ -272,7 +272,7 @@ for metvar in metvars:
                   '850TAnom':0.3,'850TADV':0.1,'850QVECT':100, \
                   '850W':3}
     
-    cbarstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':0,'850T':250, \
+    cbarstart = {'Z500':3000,'SLP':975,'IVT':0,'300W':0,'850T':250, \
                  'Z500Anom':-3,'Z850':1150,'SLPAnom':-3, \
                  '850TAnom':-2.5,'850TADV':-0.4,'850QVECT':-600, \
                  '850W':0}

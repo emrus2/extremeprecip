@@ -74,7 +74,7 @@ minprecip = [min(s) for s in allprecip]
 
 fig, ax = plt.subplots(layout='constrained')
 plot = sns.histplot(NCdatawinter, kde=True, bins=75, zorder=1, \
-                 color = 'slategrey',stat='percent',alpha=0.7)
+                 color = 'slategrey',stat='frequency',alpha=0.7)
 
 extrlim = 51.53282318
 ymax = 21
@@ -94,10 +94,10 @@ for line in ax.lines:
 #     plt.fill_betweenx(y=np.arange(0,700), x1=minprecip[i], x2=maxprecip[i],color=colors[i],zorder=zorders[i],alpha=0.5)
 
 #CUSTOMIZE SUBPLOT SPACING
-ax.set_ylabel('Percent of Days (%)',fontweight='bold')
+ax.set_ylabel('Frequency',fontweight='bold')
 ax.set_xlabel('Precipitation (mm)',fontweight='bold')
 ax.legend(loc='upper center',ncols=9,columnspacing=1.4,handletextpad=0.4,fontsize=9.7)
-ax.set_ylim(0,ymax)
+# ax.set_ylim(0,ymax)
 ax.set_xlim(-1,xmax)
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
