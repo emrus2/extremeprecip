@@ -53,6 +53,7 @@ allprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{nu
 # colors = ('tomato','indianred','gold','lightgreen','mediumseagreen','olivedrab','cornflowerblue','royalblue','plum','darkorchid','magenta','slategrey','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta')
 colors = ('royalblue','tomato','plum','lightgreen','gold','cornflowerblue','indianred','slategrey','mediumseagreen','darkorchid','magenta','orange')
 colors = ('dodgerblue','gold','darkorchid','indianred','teal','orange','lightgreen','plum','grey','tomato','olivedrab','mediumslateblue')
+colors = ('tomato','cornflowerblue','lightgreen','darkorchid','gold','lightblue','plum','mediumseagreen','indianred','royalblue','grey',(.9,0,.9))
 # colors = [plt.cm.Set3(i) for i in range(20)]
 
 binlist = [np.arange(50,240,10)]

@@ -55,8 +55,8 @@ lonmin, lonmax = (-170.25,-105.75)
 
 #%% IMPORT MERRA2 DATA
 # define metvar
-metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850T','850TAnom']
-# metvars=['IVT']
+metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850W','850TAnom']
+metvars=['850W']
 for metvar in metvars:
     os.chdir('I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2')
     #metvar = '300W'
@@ -262,14 +262,14 @@ for metvar in metvars:
                 '850TAnom':highanom,'850TADV':highanom,'850QVECT':highanom, \
                 '850W':24}
     
-    contourstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':4,'850T':250, \
-                    'Z500Anom':-3.0,'Z850':1120,'SLPAnom':-3.0, \
-                    '850TAnom':-2.5,'850TADV':-0.4,'850QVECT':-1000, \
+    contourstart = {'Z500':3000,'SLP':978,'IVT':0,'300W':4,'850T':250, \
+                    'Z500Anom':-2.8,'Z850':1120,'SLPAnom':-2.8, \
+                    '850TAnom':-2.4,'850TADV':-0.4,'850QVECT':-1000, \
                     '850W':2}
         
     contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':8,'850T':2.5, \
-                  'Z500Anom':0.5,'Z850':40,'SLPAnom':0.5, \
-                  '850TAnom':0.5,'850TADV':0.1,'850QVECT':100, \
+                  'Z500Anom':0.4,'Z850':40,'SLPAnom':0.4, \
+                  '850TAnom':0.3,'850TADV':0.1,'850QVECT':100, \
                   '850W':3}
     
     cbarstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':0,'850T':250, \
@@ -410,9 +410,9 @@ for metvar in metvars:
             place += 1
             
     #CUSTOMIZE SUBPLOT SPACING
-    fig.subplots_adjust(left=0.01,right=0.95,bottom=0.02, top=0.978,hspace=0.05, wspace=0.05) #bottom colorbar
+    fig.subplots_adjust(left=0.01,right=0.948,bottom=0.02, top=0.978,hspace=0.05, wspace=0.05) #bottom colorbar
     #fig.add_axis([left,bottom, width,height])
-    cbar_ax = fig.add_axes([0.963,0.05,0.01,0.9]) #bottom colorbar
+    cbar_ax = fig.add_axes([0.965,0.05,0.01,0.9]) #bottom colorbar
     cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1, \
                                         cbarint[metvar]),orientation='vertical')
     cbar.ax.tick_params(labelsize=9)

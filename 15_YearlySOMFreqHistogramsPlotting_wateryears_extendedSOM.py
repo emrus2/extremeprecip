@@ -25,7 +25,7 @@ os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj
 
 #%% IMPORT HISTOGRAM DATA
 
-numpatterns = 9
+numpatterns = 12
 percentile = 90
 clusters = 5
 
@@ -44,9 +44,12 @@ totaldays = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}_{numpatterns}
 
 months = np.arange(1979,2022,1)
 if numpatterns == 12:
-    colors = ('orangered','indianred','gold','lightgreen','mediumseagreen','olive','cornflowerblue','royalblue','plum','darkorchid','magenta','slategrey')
+    colors = ('','','gold','','mediumseagreen','olive','cornflowerblue','royalblue')
+    colors = ('dodgerblue','gold','darkorchid','indianred','teal','orange','lightgreen','plum','grey','tomato','olivedrab','mediumslateblue')
+    colors = ('tomato','dodgerblue','lightgreen','darkorchid','indianred','blue','gold','mediumslateblue',(.9,0,.9),'slategrey','mediumseagreen','plum','purple')
+    colors = ('tomato','cornflowerblue','lightgreen','darkorchid','gold','lightblue','plum','mediumseagreen','indianred','royalblue','grey',(.9,0,.9))
 elif numpatterns == 9:
-    colors = ('tomato','indianred','gold','lightgreen','mediumseagreen','cornflowerblue','royalblue','plum','darkorchid','magenta',)
+    colors = ('tomato','indianred','gold','lightgreen','cornflowerblue','mediumseagreen','royalblue','plum','darkorchid','magenta',)
 
 x = np.arange(len(months))  # the label locations
 #width = 0.3  # the width of the bars
@@ -70,7 +73,10 @@ ticklabels = [f"{str(year)[2:4]}-{str(year+1)[2:4]}" for year in months]
 ax.set_xticks(x, labels=ticklabels,rotation=70,fontsize=7.5)
 ax.set_yticks(range(0,21,2))
 #ax.legend(loc='upper center', ncols=3)
-ax.legend(loc='upper center',ncols=9,columnspacing=1.4,handletextpad=0.4,fontsize=9.7)
+if numpatterns == 9:
+    ax.legend(loc='upper center',ncols=9,columnspacing=1.4,handletextpad=0.4,fontsize=9.7)
+else:
+    ax.legend(loc='upper center',ncols=12,columnspacing=0.5,handletextpad=0.2,fontsize=9)
 ax.set_ylim(0,20.5)
 ax.set_xbound(-0.75,len(months)-0.3)
 

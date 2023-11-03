@@ -30,7 +30,7 @@ import scipy.io
 # define metvar
 #metvars = ['Z500', 'SLP', '850T', '300W', 'IVT','Z500Anom','300W']
 metvar = 'IVT'
-numpatterns = 9
+numpatterns = 12
 percentile = 90
 clusters = 5
 
@@ -42,43 +42,6 @@ pat_prop = np.squeeze(soms['pat_prop'])
 #%% IMPORT HISTOGRAM DATA
 data = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignMonthlyHistogram_{clusters}d.npy')
 #data[data == 0] = 'nan'
-
-# #%% CLUSTERED BAR CHART - 12 NODE
-# if numpatterns == 12:
-#     months = ("October", "November", "December", "January", "February", "March")
-#     colors = ('orangered','indianred','gold','lightgreen','mediumseagreen','olive','cornflowerblue','royalblue','plum','darkorchid','magenta','slategrey')
-    
-#     if percentile == 95:
-#         ymax = 10
-#         yint = 2
-#     elif percentile == 90:
-#         ymax = 13
-#         yint = 3
-        
-#     x = np.arange(len(months))  # the label locations
-#     width = 0.2  # the width of the bars
-#     multiplier = 1
-    
-#     fig, ax = plt.subplots(layout='constrained')
-        
-#     for i, node in enumerate(data):
-#         offset = width * multiplier
-#         rects = ax.bar(x + offset, node, width, label=i+1,align='center',color=colors[i])
-#         #ax.bar_label(rects, padding=3)
-#         multiplier += 1
-    
-#     # Add some text for labels, title and custom x-axis tick labels, etc.
-#     ax.set_ylabel('Days',fontweight='bold')
-#     ax.set_xlabel('Month',fontweight='bold')
-#     #ax.set_title('Node Frequency',fontweight='bold')
-#     ax.set_xticks(x + width + 0.2, months)
-#     ax.legend(loc='upper left', ncols=2)
-#     ax.set_ylim(0, ymax)
-    
-#     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
-#     os.chdir(save_dir)
-#     plt.savefig(f'{percentile}_{numpatterns}_NodeFreqMonthly_{clusters}d.png',dpi=300,bbox_inches='tight',pad_inches=0.08)
-#     plt.show()
 
 #%% CLUSTERED BAR CHART - 9 NODE
 if numpatterns == 9:
@@ -113,6 +76,45 @@ if numpatterns == 9:
     ax.set_ylim(0, ymax)
     ax.set_yticks(np.arange(0,ymax,yint))
     ax.set_xlim(-0.05,5.8)
+    
+    save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
+    os.chdir(save_dir)
+    plt.savefig(f'{percentile}_{numpatterns}_NodeFreqMonthly_{clusters}d.png',dpi=300,bbox_inches='tight',pad_inches=0.08)
+    plt.show()
+    
+#%% CLUSTERED BAR CHART - 12 NODE
+if numpatterns == 12:
+    months = ("October", "November", "December", "January", "February", "March")
+    colors = ('tomato','cornflowerblue','lightgreen','darkorchid','gold','lightblue','plum','mediumseagreen','indianred','royalblue','grey',(.9,0,.9))
+    
+    if clusters == 1:
+        ymax = 19
+        yint = 2
+    elif clusters == 5:
+        ymax = 13.5
+        yint = 2
+    
+    x = np.arange(len(months))  # the label locations
+    width = 0.07  # the width of the bars
+    multiplier = 0
+    
+    fig, ax = plt.subplots(layout='constrained')
+        
+    for i, node in enumerate(data):
+        offset = width * multiplier
+        rects = ax.bar(x + offset, node, width, label=i+1,align='center',color=colors[i])
+        #ax.bar_label(rects, padding=3)
+        multiplier += 1
+    
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('Days',fontweight='bold')
+    ax.set_xlabel('Month',fontweight='bold')
+    #ax.set_title('Node Frequency',fontweight='bold')
+    ax.set_xticks(x + width + 0.26, months)
+    ax.legend(loc='upper center',ncols=numpatterns,columnspacing=0.5,handletextpad=0.2,fontsize=9)
+    ax.set_ylim(0, ymax)
+    ax.set_yticks(np.arange(0,ymax,yint))
+    ax.set_xlim(-0.05,5.9)
     
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
     os.chdir(save_dir)

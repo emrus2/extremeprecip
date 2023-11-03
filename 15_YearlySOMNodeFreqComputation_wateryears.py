@@ -17,7 +17,7 @@ import scipy.io
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
-numpatterns = 9
+numpatterns = 12
 percentile = 90
 soms = scipy.io.loadmat(f'IVT_{percentile}_{numpatterns}_sompatterns.mat')
 pats = np.squeeze(soms['pats'])

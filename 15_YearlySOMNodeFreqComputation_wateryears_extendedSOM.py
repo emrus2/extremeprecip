@@ -20,7 +20,7 @@ mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
 
 # define som type
-numpatterns = 9
+numpatterns = 12
 percentile = 90
 clusters = 5
 

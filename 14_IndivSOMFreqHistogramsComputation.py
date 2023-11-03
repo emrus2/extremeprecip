@@ -19,7 +19,7 @@ from datetime import datetime
 #%% IMPORT SOM DATA
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
-numpatterns = 9
+numpatterns = 12
 percentile = 90
 clusters = 5
 
