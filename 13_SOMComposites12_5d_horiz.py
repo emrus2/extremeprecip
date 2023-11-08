@@ -299,7 +299,7 @@ for metvar in metvars:
     #%% PLOT NODES from MATLAB
     
     #create subplot for mapping multiple timesteps
-    fig = plt.figure(figsize=(10,19))
+    fig = plt.figure(figsize=(25,7.8))
     #fig.suptitle(f'{plottitle[metvar]} Composites',fontsize=13,fontweight="bold",y=0.9875)
     
     #MAP DESIRED VARIABLE
@@ -324,10 +324,10 @@ for metvar in metvars:
         # loop through each SOM day
         for j,arr in enumerate(sommaps):
         # add subplot
-            plotloc = 1 + (5*i) + j
-            ax = fig.add_subplot(numpatterns,clusters,plotloc)
+            plotloc = (i+1)+((place-1)*numpatterns)
+            ax = fig.add_subplot(clusters,numpatterns,plotloc)
             if i == 0:
-                ax.set_title(f'Day {place-5}',fontsize=10,fontweight="bold",pad=1)  
+                ax.set_ylabel(f'Day {place-5}',fontsize=10,fontweight="bold",labelpad=0.3)
             sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
             # ax.text(0.0, 1.0, i+1, transform=ax.transAxes + sublabel_loc,
             #     fontsize=10, fontweight='bold', verticalalignment='top', 
@@ -345,7 +345,7 @@ for metvar in metvars:
                         # bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
             # add som number titles
             if place == 1:
-                ax.set_ylabel(f'{i+1}',fontsize=12,fontweight="bold",labelpad=10,rotation=0)
+                ax.set_title(f'{i+1}',fontsize=12,fontweight="bold",pad=2)
             
             #create colormap of MERRA2 data
             colorm = map.pcolor(xi,yi,arr,shading='auto',cmap=colormap[metvar], \
@@ -361,16 +361,16 @@ for metvar in metvars:
             gridlinefont = 9
             parallels = np.arange(20.,71.,20.)
             meridians = np.arange(-160.,-109.,20.)
-            if place == clusters:
+            if i == numpatterns-1:
                 map.drawparallels(parallels, labels=[0,1,0,0], fontsize=gridlinefont, \
                                   color=border_c,linewidth=border_w)
                 map.drawmeridians(meridians,color=border_c,linewidth=border_w)
-                if i == numpatterns - 1:
+                if place == clusters:
                     map.drawparallels(parallels, labels=[0,1,0,0], \
                         fontsize=gridlinefont,color=border_c,linewidth=border_w)
                     map.drawmeridians(meridians, labels=[0,0,0,1],  \
                         fontsize=gridlinefont,color=border_c,linewidth=border_w)
-            elif i == numpatterns - 1:
+            elif place == clusters:
                 map.drawparallels(parallels, color=border_c,linewidth=border_w)
                 map.drawmeridians(meridians, labels=[0,0,0,1], \
                    fontsize=gridlinefont,color=border_c,linewidth=border_w)
@@ -410,11 +410,11 @@ for metvar in metvars:
             place += 1
             
     #CUSTOMIZE SUBPLOT SPACING
-    fig.subplots_adjust(left=0.035,right=0.96,bottom=0.046, top=0.991,hspace=0.05, wspace=0.05) #bottom colorbar
+    fig.subplots_adjust(left=0.01,right=0.948,bottom=0.02, top=0.978,hspace=0.05, wspace=0.05) #bottom colorbar
     #fig.add_axis([left,bottom, width,height])
-    cbar_ax = fig.add_axes([0.05,0.023,0.9,0.014]) #bottom colorbar
+    cbar_ax = fig.add_axes([0.965,0.05,0.01,0.9]) #bottom colorbar
     cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart[metvar],highlims[metvar]+1, \
-                                        cbarint[metvar]),orientation='horizontal')
+                                        cbarint[metvar]),orientation='vertical')
     cbar.ax.tick_params(labelsize=9)
     cbar.set_label(cbarlabs[metvar],fontsize=9.5,labelpad=0.5,fontweight='bold')
     
@@ -422,5 +422,5 @@ for metvar in metvars:
     #SHOW MAP
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
     os.chdir(save_dir)
-    plt.savefig(f'{numpatterns}node_{metvar}_{clusters}dSOM_composite_vert.png',dpi=300)
+    plt.savefig(f'{numpatterns}node_{metvar}_{clusters}dSOM_composite.png',dpi=300)
     plt.show()

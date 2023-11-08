@@ -29,6 +29,7 @@ import xarray as xr
 from shapely.geometry import mapping
 import matplotlib.pyplot as plt
 import glob
+# import rioxarray as rio
 
 #DEFINE WATERSHED
 watershed_name= 'UpperYuba'
@@ -61,7 +62,7 @@ watershed = NCdata.rio.clip(upperyuba.geometry.apply(mapping), upperyuba.crs, dr
 #REDUCE DATA TO DAILY MEANS >2mm
 daily_means = watershed.mean(dim=['lat','lon'],skipna=True)
 daily_means_thresh = daily_means.where(daily_means > 2)
-
+# daily_means_thresh = np.where(daily_means, daily_means>2)
 
 #%%
 

@@ -73,9 +73,9 @@ ax.tick_params(direction='in',which='both',axis='y')
 ax.legend(loc='upper center',ncols=2,columnspacing=1.4,handletextpad=0.4,fontsize=9.7)
 ax.set_xbound(3348,19300)
 
-save_dir=f'I:\\Emma\\FIROWatersheds\\Figures\\{watershed_name}'
-os.chdir(save_dir)
-plt.savefig(f'DailyMeanPrecip_{percentile}Extremes_nolegend.png',bbox_inches='tight',pad_inches=0.1,dpi=300)
+# save_dir=f'I:\\Emma\\FIROWatersheds\\Figures\\{watershed_name}'
+# os.chdir(save_dir)
+# plt.savefig(f'DailyMeanPrecip_{percentile}Extremes_nolegend.png',bbox_inches='tight',pad_inches=0.1,dpi=300)
 plt.show()
 #%%
 # plt.hist(totals,bins=50,color='blue')

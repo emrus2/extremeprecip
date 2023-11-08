@@ -100,6 +100,7 @@ ax.legend(loc='upper center',ncols=9,columnspacing=1.4,handletextpad=0.4,fontsiz
 # ax.set_ylim(0,ymax)
 ax.set_xlim(-1,xmax)
 
+
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
 os.chdir(save_dir)
 plt.savefig(f'{percentile}_{numpatterns}_PrecipDistribution2.png',dpi=300)

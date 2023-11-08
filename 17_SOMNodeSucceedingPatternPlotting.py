@@ -203,5 +203,5 @@ fig.subplots_adjust(left=0.051,right=0.93,bottom=0.085, top=0.985,hspace=0.05, w
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
 os.chdir(save_dir)
-plt.savefig(f'{percentile}_{numpatterns}_NodeSuccessionbyNodeAccumPrecip_NumEvents.png',dpi=300)
+plt.savefig('test.png',dpi=300)
 plt.show()
