@@ -31,6 +31,7 @@ metvar = 'IVT'
 numpatterns = 12
 percentile = 90
 clusters = 5
+lettered = True
 
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
@@ -108,6 +109,7 @@ if numpatterns == 9:
     plt.show()
     #%%
 if numpatterns == 12:
+
     months = ("O", "N", "D", "J", "F", "M")
     #color = 'tomato'
     colors = ('tomato','cornflowerblue','lightgreen','darkorchid','gold','lightblue','plum','mediumseagreen','indianred','royalblue','grey',(.9,0,.9))
@@ -117,13 +119,18 @@ if numpatterns == 12:
     width = 0.8  # the width of the bars
     multiplier = 0
     
-    fig = plt.figure(figsize=(7.2,6.7))
+    if lettered == True:
+        fig = plt.figure(figsize=(7.2,6.9))
+        fig.suptitle('b)',fontsize=11,fontweight="bold",y=0.997,x=0.07)
+    else:
+        fig = plt.figure(figsize=(7.2,6.7))
+    
     
     if clusters == 1:
         ymax = 50
         yint = 10
     elif clusters == 5:
-        ymax = 75
+        ymax = 71
         yint = 15
     
     
@@ -154,7 +161,7 @@ if numpatterns == 12:
         elif i == numpatterns-2 or i == numpatterns-1:
             ax.set_yticks(ylabels,[])
             ax.set_xticks(x, months)
-            if i == 7:
+            if i == 10:
                 ax.set_xlabel('Month',fontweight='bold')
         elif i == numpatterns-3:
             ax.set_yticks(ylabels)
@@ -165,10 +172,16 @@ if numpatterns == 12:
         ax.tick_params(direction='in',which='both',axis='y')
     
     #CUSTOMIZE SUBPLOT SPACING
-    fig.subplots_adjust(left=0.065,right=0.985,bottom=0.082, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
+    if lettered == True:
+        fig.subplots_adjust(left=0.065,right=0.985,bottom=0.065, top=0.975,hspace=0.05, wspace=0.05) #bottom colorbar
+    else:
+        fig.subplots_adjust(left=0.065,right=0.985,bottom=0.065, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
     
     
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
     os.chdir(save_dir)
-    plt.savefig(f'{percentile}_{numpatterns}_NodeProportionbyNode_{clusters}d.png',dpi=300)
+    if lettered == True:
+        plt.savefig(f'{percentile}_{numpatterns}_NodeProportionbyNode_{clusters}d_lettered.png',dpi=300)
+    else:
+        plt.savefig(f'{percentile}_{numpatterns}_NodeProportionbyNode_{clusters}d.png',dpi=300)
     plt.show()

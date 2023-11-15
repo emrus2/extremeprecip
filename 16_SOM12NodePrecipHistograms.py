@@ -30,6 +30,7 @@ metvar = 'IVT'
 numpatterns = 12
 percentile = 90
 clusters = 5
+lettered = True
 
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
@@ -61,9 +62,12 @@ binlist = [np.arange(50,240,10)]
 width = 0.8  # the width of the bars
 multiplier = 0
 
-fig = plt.figure(figsize=(7.2,6.7))
-#fig.suptitle('Node Precipitation',fontsize=13,fontweight="bold",y=0.9875)
-
+if lettered == True:
+    fig = plt.figure(figsize=(7.2,7.1)) #width,height
+    fig.suptitle('a)',fontsize=11,fontweight="bold",y=0.997,x=0.08)
+else:
+    fig = plt.figure(figsize=(7.2,6.7)) #width,height
+    
 if clusters == 1:
     ymax = 17.5
     yint = 3
@@ -135,10 +139,16 @@ for i,node in enumerate(allprecip):
 
 #CUSTOMIZE SUBPLOT SPACING
 #fig.subplots_adjust(left=0.065,right=0.985,bottom=0.08, top=0.95,hspace=0.05, wspace=0.05) #bottom colorbar
-fig.subplots_adjust(left=0.065,right=0.985,bottom=0.084, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
+if lettered == True:
+    fig.subplots_adjust(left=0.065,right=0.985,bottom=0.06, top=0.975,hspace=0.05, wspace=0.05) #bottom colorbar
+else:
+    fig.subplots_adjust(left=0.065,right=0.985,bottom=0.07, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
 
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
 os.chdir(save_dir)
-plt.savefig(f'{percentile}_{numpatterns}_PrecipbyNode_{clusters}d.png',dpi=300)
+if lettered == True:
+    plt.savefig(f'{percentile}_{numpatterns}_PrecipbyNode_{clusters}d_lettered.png',dpi=300)
+else:
+    plt.savefig(f'{percentile}_{numpatterns}_PrecipbyNode_{clusters}d.png',dpi=300)
 plt.show()

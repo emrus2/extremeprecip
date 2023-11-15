@@ -39,6 +39,7 @@ IVT = True
 numpatterns = 12
 percentile = 90
 clusters = 5
+lettered = True
 
 # load in SOM data
 mat_dir='I:\\Emma\\FIROWatersheds\\Data'
@@ -190,9 +191,11 @@ if IVT == True:
 #%% PLOT NODES from MATLAB
 
 #create subplot for mapping multiple timesteps
-fig = plt.figure(figsize=(7.2,6.9))
-#fig.suptitle('Precipitation Composites',fontsize=13,fontweight="bold",y=0.9875)
-
+if lettered == True:
+    fig = plt.figure(figsize=(7.2,7)) #width,height
+    fig.suptitle('b)',fontsize=11,fontweight="bold",y=0.997,x=0.07)
+else:
+    fig = plt.figure(figsize=(7.2,6.9)) #width,height
 lowlim = 2.8
 highlim = 18
 
@@ -265,19 +268,28 @@ for i, arr in enumerate(som_composites):
     #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
     
 #CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.05,right=0.908,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
+if lettered == True:
+    fig.subplots_adjust(left=0.05,right=0.908,bottom=0.02, top=0.975,hspace=0.05, wspace=0.05) #bottom colorbar
+else:
+    fig.subplots_adjust(left=0.05,right=0.908,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
 #fig.add_axis([left,bottom, width,height])
 cbar_ax = fig.add_axes([0.92,0.05,0.025,0.9]) #bottom colorbar
 cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(4,highlim+1,2),orientation='vertical')
 cbar.ax.tick_params(labelsize=8)
-cbar.set_label('Proportion of Monthly Average',fontsize=8.5,labelpad=0.5,fontweight='bold')
+cbar.set_label('Proportion of Monthly Average',fontsize=8.5,labelpad=1,fontweight='bold')
 
     
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
 os.chdir(save_dir)
-if IVT == True:
-    plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_IVT_{numpatterns}SOM_composite_{clusters}d.png',dpi=300)
+if lettered == True:
+    if IVT == True:
+        plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_IVT_{numpatterns}SOM_composite_{clusters}d_lettered.png',dpi=300)
+    else:
+        plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_{numpatterns}SOM_composite_{clusters}d_lettered.png',dpi=300)
 else:
-    plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_{numpatterns}SOM_composite_{clusters}d.png',dpi=300)
+    if IVT == True:
+        plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_IVT_{numpatterns}SOM_composite_{clusters}d.png',dpi=300)
+    else:
+        plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_{numpatterns}SOM_composite_{clusters}d.png',dpi=300)
 plt.show()

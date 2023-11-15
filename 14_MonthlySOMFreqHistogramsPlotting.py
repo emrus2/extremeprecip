@@ -33,6 +33,7 @@ metvar = 'IVT'
 numpatterns = 12
 percentile = 90
 clusters = 5
+lettered = True
 
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
@@ -99,6 +100,8 @@ if numpatterns == 12:
     multiplier = 0
     
     fig, ax = plt.subplots(layout='constrained')
+    if lettered == True:
+        fig.suptitle('a)',fontsize=11,fontweight="bold",y=0.997,x=0.03)
         
     for i, node in enumerate(data):
         offset = width * multiplier
@@ -118,5 +121,8 @@ if numpatterns == 12:
     
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
     os.chdir(save_dir)
-    plt.savefig(f'{percentile}_{numpatterns}_NodeFreqMonthly_{clusters}d.png',dpi=300,bbox_inches='tight',pad_inches=0.08)
+    if lettered == True:
+        plt.savefig(f'{percentile}_{numpatterns}_NodeFreqMonthly_{clusters}d_lettered.png',dpi=300,bbox_inches='tight',pad_inches=0.08)
+    else:
+        plt.savefig(f'{percentile}_{numpatterns}_NodeFreqMonthly_{clusters}d.png',dpi=300,bbox_inches='tight',pad_inches=0.08)
     plt.show()
