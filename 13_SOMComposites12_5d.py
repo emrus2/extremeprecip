@@ -53,10 +53,37 @@ extremeassign = list(zip(extremeevents,assignment))
 latmin, latmax = (15.5,65.5)
 lonmin, lonmax = (-170.25,-105.75)
 
+#%% CREATE ANOMALY MAP
+def center_colormap(lowlim, highlim, center=0):
+    dv = max(-lowlim, highlim) * 2
+    N = int(256 * dv / (highlim-lowlim))
+    bwr = cm.get_cmap('seismic', N)
+    newcolors = bwr(np.linspace(0, 1, N))
+    beg = int((dv / 2 + lowlim)*N / dv)
+    end = N - int((dv / 2 - highlim)*N / dv)
+    newmap = ListedColormap(newcolors[beg:end])
+    return newmap
+
+def anom_cm(metvar):
+    if metvar == 'Z500Anom':
+        lowanom, highanom = (-3.2, 2.3)
+    elif metvar == 'SLPAnom':
+        lowanom, highanom = (-3.55, 1.75)
+    elif metvar == '850TAnom':
+        lowanom, highanom = (-2.7, 1.85)
+    elif metvar == '850QVECT':
+        lowanom, highanom = (-600, 600)
+    elif metvar == 'Z300Anom':
+        lowanom, highanom = (-2.6,2.1)
+    else:
+        lowanom, highanom = (-0.4, 0.6)
+    newmap = center_colormap(lowanom, highanom, center=0)
+    return(lowanom,highanom,newmap)
+
 #%% IMPORT MERRA2 DATA
 # define metvar
-metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850W','850TAnom']
-# metvars=['850W']
+# metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850W','850TAnom']
+metvars=['Z300Anom']
 for metvar in metvars:
     os.chdir('I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2')
     #metvar = '300W'
@@ -66,15 +93,6 @@ for metvar in metvars:
     if 'Anom' in metvar:
         folderpath = metvar[:-4]
         filename = f'MERRA2_{folderpath}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{clusters}d.nc'
-    # if metvar == 'Z500Anom':
-    #     folderpath = 'Z500'
-    #     filename = f'MERRA2_Z500_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{clusters}d.nc'
-    # elif metvar == 'SLPAnom':
-    #     folderpath = 'SLP'
-    #     filename = f'MERRA2_SLP_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
-    # elif metvar == '850TAnom':
-    #     folderpath = '850T'
-    #     filename = f'MERRA2_850T_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_updated.nc'
     else:
         folderpath = metvar
         filename = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{clusters}d.nc'
@@ -83,7 +101,8 @@ for metvar in metvars:
     
     #COLLECT VARIABLE DATA FROM MERRA2 FILE
     merravar = {'Z500':'H','SLP':'SLP','850T':'T','Z850':'H', \
-                '850TADV':'__xarray_dataarray_variable__'}
+                '850TADV':'__xarray_dataarray_variable__' ,\
+                'Z300Anom':'H'}
     #open the netcdf file in read mode
     gridfile = nc.Dataset(filepath,mode='r')
     print(gridfile)
@@ -222,80 +241,55 @@ for metvar in metvars:
             zmin = lowlim
     
     print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
-    
-    #%% CREATE ANOMALY MAP 
-    #GENERATE CUSTOM COLORMAP
-    def center_colormap(lowlim, highlim, center=0):
-        dv = max(-lowlim, highlim) * 2
-        N = int(256 * dv / (highlim-lowlim))
-        bwr = cm.get_cmap('seismic', N)
-        newcolors = bwr(np.linspace(0, 1, N))
-        beg = int((dv / 2 + lowlim)*N / dv)
-        end = N - int((dv / 2 - highlim)*N / dv)
-        newmap = ListedColormap(newcolors[beg:end])
-        return newmap
-    
+        
     #%% DEFINE PLOTTING VARIABLES
-    if metvar == 'Z500Anom':
-        lowanom, highanom = (-3.2, 2.3)
-        newmap = center_colormap(lowanom, highanom, center=0)
-    elif metvar == 'SLPAnom':
-        lowanom, highanom = (-3.55, 1.75)
-        newmap = center_colormap(lowanom, highanom, center=0)
-    elif metvar == '850TAnom':
-        lowanom, highanom = (-2.7, 1.85)
-        newmap = center_colormap(lowanom, highanom, center=0)
-    elif metvar == '850QVECT':
-        lowanom, highanom = (-600, 600)
-        newmap = center_colormap(lowanom, highanom, center=0)
-    else:
-        lowanom, highanom = (-0.4, 0.6)
-        newmap = center_colormap(lowanom, highanom, center=0)
         
-    lowlims = {'Z500':2850,'SLP':975,'IVT':0,'300W':0,'850T':244, \
-               'Z500Anom':lowanom, 'Z850':1114,'SLPAnom':lowanom, \
-               '850TAnom':lowanom,'850TADV':lowanom,'850QVECT':lowanom, \
-               '850W':0}
+    lowlims = {'Z500':2850, \
+               'SLP':975,'IVT':0,'300W':0,'850T':244, \
+               'Z500Anom':anom_cm('Z500Anom')[0], 'Z850':1114,'SLPAnom':anom_cm('SLPAnom')[0], \
+               '850TAnom':anom_cm('850TAnom')[0],'850TADV':0,'850QVECT':0, \
+               '850W':0,'Z300':anom_cm('Z300Anom')[0]}
         
-    highlims = {'Z500':5700,'SLP':1034,'IVT':807,'300W':75,'850T':293, \
-                'Z500Anom':highanom,'Z850':1595,'SLPAnom':highanom, \
-                '850TAnom':highanom,'850TADV':highanom,'850QVECT':highanom, \
-                '850W':25}
+    highlims = {'Z500':5700,'SLP':1034,'IVT':763,'300W':75,'850T':293, \
+                'Z500Anom':anom_cm('Z500Anom')[1],'Z850':1595,'SLPAnom':anom_cm('SLPAnom')[1], \
+                '850TAnom':anom_cm('850TAnom')[1],'850TADV':0,'850QVECT':0, \
+                '850W':25,'Z300Anom':anom_cm('Z300Anom')[1]}
     
     contourstart = {'Z500':3000,'SLP':978,'IVT':0,'300W':4,'850T':250, \
                     'Z500Anom':-2.8,'Z850':1120,'SLPAnom':-2.8, \
                     '850TAnom':-2.4,'850TADV':-0.4,'850QVECT':-1000, \
-                    '850W':2}
+                    '850W':2,'Z300Anom':-2.4}
         
     contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':8,'850T':2.5, \
                   'Z500Anom':0.4,'Z850':40,'SLPAnom':0.4, \
                   '850TAnom':0.3,'850TADV':0.1,'850QVECT':100, \
-                  '850W':3}
+                  '850W':3,'Z300Anom':0.4}
     
     cbarstart = {'Z500':3000,'SLP':975,'IVT':0,'300W':0,'850T':250, \
                  'Z500Anom':-3,'Z850':1150,'SLPAnom':-3, \
                  '850TAnom':-2.5,'850TADV':-0.4,'850QVECT':-600, \
-                 '850W':0}
+                 '850W':0,'Z300Anom':-2.5}
         
     cbarint = {'Z500':500,'SLP':10,'IVT':100,'300W':10,'850T':5, \
                'Z500Anom':1,'Z850':50,'SLPAnom':1, \
                '850TAnom':0.5,'850TADV':0.2,'850QVECT':200, \
-               '850W':4}
+               '850W':4,'Z300Anom':0.5}
     
     colormap = {'Z500':'jet','SLP':'rainbow','IVT':'gnuplot2_r','300W':'hot_r', \
-                '850T':'turbo','Z500Anom':newmap,'Z850':'turbo','SLPAnom':newmap, \
-                '850TAnom':newmap,'850TADV':newmap,'850QVECT':newmap,'850W':'hot_r'}
+                '850T':'turbo','Z500Anom':anom_cm('Z500Anom')[2],'Z850':'turbo','SLPAnom':anom_cm('SLPAnom')[2], \
+                '850TAnom':anom_cm('850TAnom')[2],'850TADV':'jet','850QVECT':'jet', \
+                    '850W':'hot_r','Z300Anom':anom_cm('Z300Anom')[2]}
         
     cbarlabs = {'Z500':'m','SLP':'hPa','IVT':'kg $\mathregular{m^{-1}}$ $\mathregular{s^{-1}}$', \
                 '300W':'m/s','850T':'K','Z500Anom':r'$\mathbf{\sigma}$','Z850':'m', \
                     'SLPAnom':r'$\mathbf{\sigma}$','850TAnom':r'$\mathbf{\sigma}$', \
                         '850TADV':u'\N{DEGREE SIGN}C/hr','850QVECT':'m/kgs', \
-                        '850W':'m/s'}
+                        '850W':'m/s','Z300Anom':r'$\mathbf{\sigma}$'}
         
     plottitle = {'Z500':'Z500','SLP':'SLP','IVT':'IVT','300W':'300 hPa Wind', \
                  '850T':'850 hPa Temperature','Z500Anom':'Z500 Anomaly','Z850':'Z850', \
                      'SLPAnom':'SLP Anomaly','850TAnom':'850 hPa Temperature Anomaly', \
-                         '850TADV':'Tadv','850W':'850 hPa Wind'}
+                         '850TADV':'Tadv','850W':'850 hPa Wind','Z300Anom':'Z300 Anomaly'}
     #%% PLOT NODES from MATLAB
     
     #create subplot for mapping multiple timesteps
@@ -315,11 +309,6 @@ for metvar in metvars:
     
     for i, sommaps in enumerate(allsomcomposites):
         place = 1
-        # define percentage assigned to each node
-        # perc_assigned = str(round(pat_prop[i]*100,1))
-        # create color algorithm
-        # gbcolor = 1.1-(pat_freq[i]/44)
-        # patfreq_col = (1,gbcolor,gbcolor)
     
         # loop through each SOM day
         for j,arr in enumerate(sommaps):
@@ -329,20 +318,6 @@ for metvar in metvars:
             if i == 0:
                 ax.set_title(f'Day {place-5}',fontsize=10,fontweight="bold",pad=1)  
             sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
-            # ax.text(0.0, 1.0, i+1, transform=ax.transAxes + sublabel_loc,
-            #     fontsize=10, fontweight='bold', verticalalignment='top', 
-            #     bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-            
-            # add percentage labels
-            # if place == 5:
-                # if len(perc_assigned) == 4:
-                    # ax.text(x=0.735, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-                        # fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
-                        # bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
-                # else:
-                    # ax.text(x=0.775, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-                        # fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
-                        # bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
             # add som number titles
             if place == 1:
                 ax.set_ylabel(f'{i+1}',fontsize=12,fontweight="bold",labelpad=10,rotation=0)

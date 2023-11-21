@@ -19,8 +19,8 @@ import os
 os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj")
 #%% IMPORT MERRA2
 
-metvar = '850T'
-merravar = {'Z500':'H','SLP':'SLP','850T':'T'}
+metvar = 'Z300'
+merravar = {'Z300':'H','Z500':'H','SLP':'SLP','850T':'T'}
 percentile = 90
 clusters = 5
 
@@ -34,6 +34,7 @@ gridfile = nc.Dataset(filepath,mode='r')
 gridlat = gridfile.variables['lat'][:]
 gridlon = gridfile.variables['lon'][:]
 merra = np.squeeze(gridfile.variables[merravar[metvar]][:])
+dates = gridfile.variables['date'][:]
 gridfile.close()
   
 #calculate Z500 anomaly

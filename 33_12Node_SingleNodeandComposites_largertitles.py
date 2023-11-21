@@ -42,19 +42,17 @@ def center_colormap(lowlim, highlim, center=0):
 def anom_cm(metvar):
     if metvar == 'Z500Anom':
         lowanom, highanom = (-3.2, 2.3)
-        newmap = center_colormap(lowanom, highanom, center=0)
     elif metvar == 'SLPAnom':
         lowanom, highanom = (-3.55, 1.75)
-        newmap = center_colormap(lowanom, highanom, center=0)
     elif metvar == '850TAnom':
         lowanom, highanom = (-2.7, 1.85)
-        newmap = center_colormap(lowanom, highanom, center=0)
     elif metvar == '850QVECT':
         lowanom, highanom = (-600, 600)
-        newmap = center_colormap(lowanom, highanom, center=0)
+    elif metvar == 'Z300Anom':
+        lowanom, highanom = (-2.6,2.1)
     else:
         lowanom, highanom = (-0.4, 0.6)
-        newmap = center_colormap(lowanom, highanom, center=0)
+    newmap = center_colormap(lowanom, highanom, center=0)
     return(lowanom,highanom,newmap)
 
 #%% IMPORT SOM DATA
@@ -85,16 +83,16 @@ latmin, latmax = (15.5,65.5)
 lonmin, lonmax = (-170.25,-105.75)
 
 #%% REDUCE NODE PATTERN
-for node in range(2,numpatterns+1):
+for node in range(1,numpatterns+1):
 # if node == True:
 #     node = 1
     som = node - 1
     nodepat = patterns[som,:] # see if this is correct
     
     #%% OPEN MERRA DATA FOR EACH METVAR
-    metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850W','850TAnom']
-    metvars=['300W','Z500Anom','SLP','SLPAnom','850TAnom''850W']
-    metvars =['300W','Z500Anom','SLP','SLPAnom','850TAnom','850W']
+    # metvars = ['IVT','300W','Z500Anom','SLP','SLPAnom','Z850','850W','850TAnom']
+    # metvars=['300W','Z500Anom','SLP','SLPAnom','850TAnom''850W']
+    metvars =['300W','Z300Anom','SLP','SLPAnom','850TAnom','850W']
     allsomcomposites = []
     
     for metvar in metvars:
@@ -113,7 +111,7 @@ for node in range(2,numpatterns+1):
                     '850TADV':'__xarray_dataarray_variable__'}
         #open the netcdf file in read mode
         gridfile = nc.Dataset(filepath,mode='r')
-        print(gridfile)
+        # print(gridfile)
         gridlat = gridfile.variables['lat'][:]
         gridlon = gridfile.variables['lon'][:]
         if metvar == 'IVT':
@@ -215,20 +213,20 @@ for node in range(2,numpatterns+1):
             allsomcomposites.append(som_composites)
                 
         #%% DETERMINE MAX AND MIN VALIUES
-        zmax = 0
-        zmin = 1E8
+        # zmax = 0
+        # zmin = 1E8
         
-        for i, arr in enumerate(allsomcomposites):
-            #determine zmax and zmin for all days
-            highlim = np.nanmax(arr)
-            lowlim = np.nanmin(arr)
-            #print(lowlim,highlim)
-            if highlim > zmax:
-                zmax = highlim
-            if lowlim < zmin:
-                zmin = lowlim
+        # for i, arr in enumerate(allsomcomposites):
+        #     #determine zmax and zmin for all days
+        #     highlim = np.nanmax(arr)
+        #     lowlim = np.nanmin(arr)
+        #     #print(lowlim,highlim)
+        #     if highlim > zmax:
+        #         zmax = highlim
+        #     if lowlim < zmin:
+        #         zmin = lowlim
         
-        print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
+        # print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
     
     #%% ADD SOM PATTERN
     nodepat = nodepat.reshape(clusters,len(gridlatreduced),len(gridlonreduced))
@@ -239,38 +237,39 @@ for node in range(2,numpatterns+1):
       
     lowlims = {'Z500':2850, \
                'SLP':975,'IVT':0,'300W':0,'850T':244, \
-               'Z500Anom':anom_cm('Z500Anom')[0], 'Z850':1114,'SLPAnom':anom_cm('SLPAnom')[0], \
+               'Z300Anom':anom_cm('Z300Anom')[0], 'Z850':1114,'SLPAnom':anom_cm('SLPAnom')[0], \
                '850TAnom':anom_cm('850TAnom')[0],'850TADV':0,'850QVECT':0, \
                '850W':0}
         
     highlims = {'Z500':5700,'SLP':1034,'IVT':763,'300W':75,'850T':293, \
-                'Z500Anom':anom_cm('Z500Anom')[1],'Z850':1595,'SLPAnom':anom_cm('SLPAnom')[1], \
+                'Z300Anom':anom_cm('Z300Anom')[1],'Z850':1595,'SLPAnom':anom_cm('SLPAnom')[1], \
                 '850TAnom':anom_cm('850TAnom')[1],'850TADV':0,'850QVECT':0, \
                 '850W':25}
     
     contourstart = {'Z500':3000,'SLP':978,'IVT':0,'300W':4,'850T':250, \
                     'Z500Anom':-2.8,'Z850':1120,'SLPAnom':-3.0, \
                     '850TAnom':-2.4,'850TADV':-0.4,'850QVECT':-1000, \
-                    '850W':2}
+                    '850W':2,'Z300Anom':-2.4}
         
     contourint = {'Z500':200,'SLP':4,'IVT':75,'300W':8,'850T':2.5, \
-                  'Z500Anom':0.4,'Z850':40,'SLPAnom':0.4, \
+                  'Z300Anom':0.4,'Z850':40,'SLPAnom':0.4, \
                   '850TAnom':0.3,'850TADV':0.1,'850QVECT':100, \
-                  '850W':3}
+                  '850W':3,'Z300Anom':0.4}
     
     cbarstart = {'Z500':3000,'SLP':980,'IVT':0,'300W':0,'850T':250, \
                  'Z500Anom':-3,'Z850':1150,'SLPAnom':-3, \
                  '850TAnom':-2,'850TADV':-0.4,'850QVECT':-600, \
-                 '850W':0}
+                 '850W':0,'Z300Anom':-2.5}
         
     cbarint = {'Z500':500,'SLP':15,'IVT':250,'300W':25,'850T':5, \
                'Z500Anom':1,'Z850':50,'SLPAnom':1, \
                '850TAnom':1,'850TADV':0.2,'850QVECT':200, \
-               '850W':5}
+               '850W':5,'Z300Anom':0.5}
     
     colormap = {'Z500':'jet','SLP':'rainbow','IVT':'gnuplot2_r','300W':'hot_r', \
                 '850T':'turbo','Z500Anom':anom_cm('Z500Anom')[2],'Z850':'turbo','SLPAnom':anom_cm('SLPAnom')[2], \
-                '850TAnom':anom_cm('850TAnom')[2],'850TADV':'jet','850QVECT':'jet','850W':'hot_r'}
+                '850TAnom':anom_cm('850TAnom')[2],'850TADV':'jet','850QVECT':'jet', \
+                    '850W':'hot_r','Z300Anom':anom_cm('Z300Anom')[2]}
         
     cbarlabs = {'SLP':'hPa', \
                 'IVT':'kg/m/s', \
@@ -279,21 +278,24 @@ for node in range(2,numpatterns+1):
                     'SLPAnom':'$\mathbf{SLP}$ $\mathbf{Anoms}$ \n' + r'(${\sigma}$)', \
                         '850TAnom':r' ${\sigma}$', \
                         '850TADV':u'\N{DEGREE SIGN}C/hr','850QVECT':'m/kgs', \
-                        '850W':'$\mathbf{850}$ $\mathbf{hPa}$ $\mathbf{Winds}$ \n (m/s)'}
+                        '850W':'$\mathbf{850}$ $\mathbf{hPa}$ $\mathbf{Winds}$ \n (m/s)', \
+                        'Z300Anom':'$\mathbf{Z300}$ $\mathbf{Anoms}$ \n' + r'(${\sigma}$)'}
         
-    plottitle = {'Z500':'Z500','SLP':'SLP','IVT':'IVT SOM','300W':'300 hPa Wind', \
-                 '850T':'850 hPa Temperature','Z500Anom':'Z500 Anom','Z850':'Z850', \
-                     'SLPAnom':'SLP Anom','850TAnom':'850 hPa \n Temp Anom', \
-                         '850TADV':'Tadv','850W':'850 hPa Wind'}
-    cbar_x, cbar_len, cbar_wid = (0.928,0.22,0.014)
-    cbar_y = {'IVT':0.745,'300W':0.505,'Z500Anom':0.505,'SLP':0.263, \
-              'SLPAnom':0.263, '850TAnom':0.022, '850W':0.022}
-    cbarpad = {'IVT':4,'300W':12,'Z500Anom':12,'SLP':1, \
+    plottitle = {'IVT':'a) IVT SOM',
+                 'SLP':'c) Sea Level Pressure and Anomalies', \
+                 '300W':'b) 300 hPa Wind Speed and Z300 Anomalies', \
+                 'Z300Anom':'b) 300 hPa Wind Speed and Z300 Anomalies',
+                 '850TAnom':'d) 850 hPa Temperature Anomalies and 850 hPa Wind'}
+    cbar_x, cbar_len, cbar_wid = (0.928,0.21,0.014)
+    cbar_y = {'IVT':0.757,'300W':0.511,'Z300Anom':0.511,'SLP':0.266, \
+              'SLPAnom':0.266, '850TAnom':0.022, '850W':0.022}
+    cbarpad = {'IVT':4,'300W':12,'Z300Anom':12,'SLP':1, \
               'SLPAnom':1, '850TAnom':10, '850W':10}
     
     # #%% CREATE FIGURE
     #create subplot for mapping multiple timesteps
-    fig = plt.figure(figsize=(10,5.8)) #width, height
+    fig = plt.figure(figsize=(10,6.2)) #width, height
+
     #fig.suptitle(f'{plottitle[metvar]} Composites',fontsize=13,fontweight="bold",y=0.9875)
     
     #MAP DESIRED VARIABLE
@@ -330,7 +332,12 @@ for node in range(2,numpatterns+1):
             # ax = fig.add_subplot(len(allsomcomposites)-3,clusters,plotloc)
             ax = fig.add_subplot(4,clusters,plotloc)
             if i == 0:
-                ax.set_title(f'Day {place-5}',fontsize=10,fontweight="bold",pad=1)  
+                if place == 1:
+                    ax.set_title(f'Day {place-5}     ',fontsize=10,fontweight="bold",pad=6,loc='right')
+                else:
+                    ax.set_title(f'Day {place-5}',fontsize=10,fontweight="bold",pad=4,loc='center')
+            if place == 1:
+                    ax.set_title(plottitle[metvar],fontsize=10,pad=3,loc='left',y=1.0)
             sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     
             #create colormap of MERRA2 data
@@ -406,10 +413,10 @@ for node in range(2,numpatterns+1):
            
         placecounter += 1
     #CUSTOMIZE SUBPLOT SPACING
-    fig.subplots_adjust(left=0.035,right=0.92,bottom=0.02, top=0.97,hspace=0.05, wspace=0.05) #bottom colorbar
+    fig.subplots_adjust(left=0.035,right=0.92,bottom=0.02, top=0.97,hspace=0.15, wspace=0.05) #bottom colorbar
     
     #SHOW MAP
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
     os.chdir(save_dir)
-    plt.savefig(f'{numpatterns}node_{node}Node_composites.png',dpi=300)
+    plt.savefig(f'{numpatterns}node_{node}Node_composites_testing1.png',dpi=300)
     plt.show()

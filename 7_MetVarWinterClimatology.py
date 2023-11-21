@@ -20,8 +20,8 @@ import xarray as xr
 import glob
 import numpy as np
 
-metvar = '850T'
-filepath = {'Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressure_3hourly','850T':'Temperature_at_850_hPa_3hourly'}
+metvar = 'Z300'
+filepath = {'Z300':'300_hPa_Geopotential_Height_3hourly','Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressure_3hourly','850T':'Temperature_at_850_hPa_3hourly'}
 
 print("**************************************************")
 print("Calculating Climatology...")

@@ -87,10 +87,11 @@ for date in extremedates:
     # should be 801 days
 #%% DEFINE EXTREME MERRA2 FILES
 #define files of interest
-metvars = ['Z500','850T','Z850','850W']
+metvars = ['Z300']
 metpath = {'Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressure_3hourly','IVT':'IVT_daily', \
                '300W':'East_and_North_wind_components_at_300_hPa','850T':'Temperature_at_850_hPa_3hourly', \
-                   'Z850':'850_hPa_Geopotential_Height_3hourly','850W':'East_and_North_wind_components_at_850_hPa'}
+                   'Z850':'850_hPa_Geopotential_Height_3hourly','850W':'East_and_North_wind_components_at_850_hPa', \
+                'Z300':'300_hPa_Geopotential_Height_3hourly'}
 
 for metvar in metvars:
     folderpath = f'I:\\MERRA2\\Daily_and_Subdaily\\{metpath[metvar]}'
@@ -100,7 +101,7 @@ for metvar in metvars:
     #print(extremefiles)
     extremefiles.sort() # works for IVT
     extremefiles = [string for string in extremefiles if '.nc.1' not in string]
-        # should be 801 days
+        # should be 801 (2 days prior) and 965 (4 days prior)
             
     #%% CREATE EXTREMES DATASET
     ''' can I concatenate every three days? (horizontally) '''
