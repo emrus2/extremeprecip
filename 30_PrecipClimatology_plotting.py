@@ -56,9 +56,9 @@ ex_precip = extremes.variables['precipitation_amount'][:]
 #line2 = plt.plot(dates,precip,marker='.',linewidth=0.1,color='blue',label ='< 95th Percentile')
 fig, ax = plt.subplots(layout='constrained')
 
-line3 = plt.plot(dates,precip,marker='.',linewidth=0,color='blue',label=f'< {percentile}th Percentile')
-line1 = plt.plot(dates,ex_precip,marker='.',linewidth=0,color='red',label=f'> {percentile}th Percentile',zorder=5)
-line2 = plt.plot(dates,precip,marker='.',linewidth=0.1,color='blue')
+line1 = plt.plot(dates,ex_precip,marker='.',linewidth=0,color='r',label=f'> {percentile}th Percentile',zorder=5)
+line2 = plt.plot(dates,precip,linewidth=0.1,color='0.1')
+line3 = plt.plot(dates,precip,marker='.',linewidth=0,color='b',label=f'< {percentile}th Percentile')
 
 
 if percentile == 95:
@@ -68,10 +68,13 @@ elif percentile == 90:
 ax.axhline(y=extrlim,color='red',linewidth=2,alpha=0.5)
 ax.set_xlabel('Year',fontweight='bold')
 ax.set_ylabel('Precipitation (mm)',fontweight='bold')
-ax.tick_params(direction='in',which='both',axis='y')
+ax.tick_params(direction='in',which='both',axis='y',labelsize=7)
 #plt.title('Winter Season Daily Mean Precipitation',fontweight='bold')
 ax.legend(loc='upper center',ncols=2,columnspacing=1.4,handletextpad=0.4,fontsize=9.7)
-ax.set_xbound(3348,19300)
+ax.set_xbound(34E2,192E2)
+ax.set_ybound(0,215)
+
+
 
 # save_dir=f'I:\\Emma\\FIROWatersheds\\Figures\\{watershed_name}'
 # os.chdir(save_dir)

@@ -59,8 +59,9 @@ watershed = 'UpperYuba'
 ws_directory = f'I:\\Emma\\FIROWatersheds\\Data\\WatershedShapefiles\\California\\{watershed}\\'
 
 #%% DEFINE LAT LON BOUNDS FOR PLOTTING
-latmin,latmax = (38,41)
-lonmin, lonmax = (-123.5, -119.5)
+latmin, latmax = (30.75,43.5)
+lonmin, lonmax = (-125.25,-113.5)
+
 
 #reduce the latitude, longitude, and etopo to Western US
 latlims = np.logical_and(gridlatreduced > latmin, gridlatreduced < latmax)
@@ -77,17 +78,21 @@ etoponew = etoponew[:,lonind]
 #convert lat and lon into a 2D array
 lon, lat = np.meshgrid(gridlonnew,gridlatnew)
 
-#%% PLOT FIGURE
+#%% PLOT MAIN FIGURE
 
-fig = plt.figure(figsize=(7.2,5))
+fig, ax = plt.subplots(layout='constrained',figsize=(7.2,5))
 
 area_thresh = 1E4
-map = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,urcrnrlon=lonmax,resolution='l',area_thresh=area_thresh) #low resolution
+latminsm,latmaxsm = (38,41)
+lonminsm, lonmaxsm = (-123.5, -119.5)
+map = Basemap(projection='cyl',llcrnrlat=latminsm,urcrnrlat=latmaxsm,llcrnrlon=lonminsm,urcrnrlon=lonmaxsm,resolution='i',area_thresh=area_thresh) #low resolution
+map.bluemarble()
+
 xi, yi = map(lon,lat)
 
 #create a colormap of topography data
 vmin,vmax = (-2500,3750)
-colorm = map.pcolor(xi,yi,etoponew,shading='auto',cmap='terrain',zorder=1,vmin=vmin,vmax=vmax)
+# colorm = map.pcolor(xi,yi,etoponew,shading='auto',cmap='terrain',zorder=1,vmin=vmin,vmax=vmax)
 
 #define border color and thickness
 border_c = '0.1'
@@ -101,22 +106,50 @@ except:
     pass
 map.drawstates(color=border_c, linewidth=border_w,zorder=3)
 map.drawcountries(color=border_c, linewidth=border_w,zorder=3)
-map.drawparallels(np.arange(37.,43.,1.), labels=[1,0,0,0], fontsize=10,color=border_c, linewidth=border_w)
-map.drawmeridians(np.arange(-125.,-119.,1.), labels=[0,0,0,1], fontsize=10,color=border_c, linewidth=border_w)
+# map.drawparallels(np.arange(37.,43.,1.), labels=[1,0,0,0], fontsize=10,color=border_c, linewidth=border_w)
+# map.drawmeridians(np.arange(-125.,-119.,1.), labels=[0,0,0,1], fontsize=10,color=border_c, linewidth=border_w)
 
 #PLOT WATERSHED SHAPE
 map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed)
-
+# plt.scatter(-120.9,39.5,color='r',marker='*',s=300,linewidth=1,edgecolors='k',zorder=4)
 #create plot title
 #plt.title('24 OCT 2021',fontweight='bold')
 
 lowlim,highlim = (0,3750)
 #create colorbar
-cbar = map.colorbar(colorm, location='right', pad="5%",)
-cbar.set_label('Elevation (m)')
+# cbar = map.colorbar(colorm, location='right', pad="5%",)
+# cbar.set_label('Elevation (m)')
+
+#INSERT SMALLER AXIS OF ZOOMED OUT VERSION
+
+
+# this is an inset axes over the main axes
+right_inset_ax = fig.add_axes([-0.01, .58, .4, .4], facecolor='k')
+map2 = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,urcrnrlon=lonmax,resolution='l',area_thresh=area_thresh,ax=right_inset_ax) #low resolution
+
+colorm = map2.pcolor(xi,yi,etoponew,shading='auto',cmap='terrain',zorder=1,vmin=vmin,vmax=vmax,ax=right_inset_ax)
+#define border color and thickness
+border_c = '0.1'
+border_w = 0.5
+
+#map underlying map, with  parallel labels on the left, and meridian labels on the bottom
+map2.drawlsmask(land_color='none',ocean_color='paleturquoise',zorder=2)
+try:
+    map2.drawcoastlines(color=border_c,linewidth=border_w,zorder=3)
+except:
+    pass
+map2.drawstates(color=border_c, linewidth=border_w,zorder=3)
+map2.drawcountries(color=border_c, linewidth=border_w,zorder=3)
+# map.drawparallels(np.arange(37.,43.,1.), labels=[1,0,0,0], fontsize=10,color=border_c, linewidth=border_w)
+# map.drawmeridians(np.arange(-125.,-119.,1.), labels=[0,0,0,1], fontsize=10,color=border_c, linewidth=border_w)
+
+#PLOT WATERSHED SHAPE
+# map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed)
+plt.scatter(-120.9,39.5,color='r',marker='*',s=100,linewidth=1,edgecolors='k',zorder=4)
+
 
 #show map
-save_dir = f'I:\\Emma\\FIROWatersheds\\Figures\\{watershed}'
+save_dir = 'I:\\Emma\\FIROWatersheds\\Figures\\'
 save_file = f'{watershed}_elevation.png'
 plt.savefig(os.path.join(save_dir,save_file),dpi=300)
 plt.show()

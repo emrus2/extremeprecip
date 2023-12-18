@@ -73,7 +73,7 @@ lowlims, highlims = (0,763)
 contourstart, contourint = (0,75)
 cbarstart, cbarint = (0,100)
 colormap = 'gnuplot2_r'
-cbarlabs = 'kg $\mathregular{m^{-1}}$ $\mathregular{s^{-1}}$'
+cbarlabs = 'kg/m/s'
 plottitle = metvar
 
 #%% PLOT NODES from MATLAB
@@ -110,18 +110,19 @@ for i, arr in enumerate(patterns):
         plotloc = (i+1)+((place-1)*numpatterns)
         ax = fig.add_subplot(clusters,numpatterns,plotloc)
         if i == 0:
-            ax.set_ylabel(f'Day {place-5}',fontsize=14,fontweight="bold",labelpad=0.3)
+            ax.set_ylabel(f'Day {place-5}',fontsize=14,fontweight="bold",labelpad=0.2)
         sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
+        sublab_fontsize = 11
         if place == 5:
             if len(perc_assigned) == 4:
-                xloc = 0.710
+                xloc = 0.65
             else:
-                xloc = 0.755
+                xloc = 0.71
             ax.text(x=0.005, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
-                fontsize=9, fontweight='bold', verticalalignment='top', color = 'k',
+                fontsize=sublab_fontsize, fontweight='bold', verticalalignment='top', color = 'k',
                 bbox=dict(facecolor=precip_col, edgecolor='none', pad=1.5),zorder=3)
             ax.text(x=xloc, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
-                fontsize=9, fontweight='bold',verticalalignment='top', color = 'k',
+                fontsize=sublab_fontsize, fontweight='bold',verticalalignment='top', color = 'k',
                 bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
         if place == 1:
             ax.set_title(f'Node {i+1}',fontsize=14,fontweight="bold",pad=2)        
@@ -136,7 +137,7 @@ for i, arr in enumerate(patterns):
         map.drawcoastlines(color=border_c, linewidth=border_w)
         map.drawstates(color=border_c, linewidth=border_w)
         map.drawcountries(color=border_c, linewidth=border_w)
-        gridlinefont = 9
+        gridlinefont = 11
         parallels = np.arange(20.,71.,20.)
         meridians = np.arange(-160.,-109.,20.)
         if i == 11:
@@ -159,16 +160,16 @@ for i, arr in enumerate(patterns):
         plt.clabel(contourm,levels=np.arange(contourstart,highlims+1,contourint*2),fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
             
         #add yuba shape
-        plt.scatter(-120.9,39.5,color='w',marker='*',linewidths=0.7,zorder=4)
+        plt.scatter(-120.9,39.5,color='w',marker='*',s=80,linewidth=1,edgecolors='0.9',zorder=4)
         place +=1
     
 #CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.01,right=0.948,bottom=0.02, top=0.978,hspace=0.05, wspace=0.05) #bottom colorbar
+fig.subplots_adjust(left=0.011,right=0.946,bottom=0.021, top=0.975,hspace=0.05, wspace=0.05) #bottom colorbar
 #fig.add_axis([left,bottom, width,height])
-cbar_ax = fig.add_axes([0.965,0.05,0.01,0.9]) #bottom colorbar
+cbar_ax = fig.add_axes([0.964,0.05,0.01,0.9]) #bottom colorbar
 cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(cbarstart,highlims+1,cbarint),orientation='vertical')
-cbar.ax.tick_params(labelsize=9)
-cbar.set_label(cbarlabs,fontsize=9.5,labelpad=0.5,fontweight='bold')
+cbar.ax.tick_params(labelsize=12)
+cbar.set_label(cbarlabs,fontsize=13,labelpad=0.5,fontweight='bold')
 
     
 #SHOW MAP
