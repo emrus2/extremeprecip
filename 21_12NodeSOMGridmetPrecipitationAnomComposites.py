@@ -39,7 +39,7 @@ IVT = True
 numpatterns = 12
 percentile = 90
 clusters = 5
-lettered = True
+lettered = False
 
 # load in SOM data
 mat_dir='I:\\Emma\\FIROWatersheds\\Data'

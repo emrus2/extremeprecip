@@ -62,4 +62,9 @@ for som in range(len(pats[:,0])):
         monthcount = monthlist.count(monthstr)
         node_monthfreq[som,count] = monthcount
 
+# calculate total number of extreme days in each month
+monthlytotals = np.sum(node_monthfreq,axis=0)
+
+# save arrays
 np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignMonthlyHistogram_{clusters}d.npy',node_monthfreq)
+np.save(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}MonthlyTotals_{clusters}d.npy',monthlytotals)
