@@ -74,18 +74,22 @@ area_thresh = 1E4
 latminsm,latmaxsm = (38,41)
 lonminsm, lonmaxsm = (-123.5, -119.5)
 map = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,urcrnrlon=lonmax,resolution='l',area_thresh=area_thresh) #low resolution
+# map.bluemarble()
 xi, yi = map(lon,lat)
 
 #create a colormap of topography data
-vmin,vmax = (0,4015)
-colorm = map.pcolor(xi,yi,etoponew,shading='auto',cmap='gray',zorder=1,vmin=vmin,vmax=vmax)
-#define border color and thickness
-border_c = '0.1'
-border_w = 0.5
+vmin,vmax = (-1000,4015)
 
+colorm = map.pcolor(xi,yi,etoponew,shading='auto',cmap='gray',zorder=1,vmin=vmin,vmax=vmax)
+# etoponew[etoponew <= -15] = 1E5
+# colorm = map.pcolor(xi,yi,etoponew,shading='auto',cmap='gray',zorder=2,vmin=vmin,vmax=vmax)
+#define border color and thickness
+border_c = 'k'
+border_w = 3
 #map underlying map, with  parallel labels on the left, and meridian labels on the bottom
-map.drawlsmask(land_color='none',ocean_color='white',zorder=2)
+water = map.drawlsmask(land_color='none',ocean_color='white',zorder=2)
 try:
+    map.drawcoastlines(color='0.3',linewidth=border_w+3,zorder=3)
     map.drawcoastlines(color=border_c,linewidth=border_w,zorder=3)
 except:
     pass

@@ -12,17 +12,11 @@ to plot the monthly node frequency (for cummulative nodes)
 UPDATED 6/12/2023
 """
 #%% IMPORT MODULES
-#import netCDF4 as nc #if this doesn't work, try to reinstall in anaconda prompt using
-    #conda install netcdf4
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-#from matplotlib.colors import ListedColormap
-#import matplotlib.cm as cm
 import matplotlib.transforms as mtransforms
 os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj")
-#from mpl_toolkits.basemap import Basemap #installed using 
-    #conda install -c anaconda basemap
 import scipy.io
 
 #%% IMPORT SOM DATA
@@ -48,38 +42,39 @@ totaldata = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{nu
 #convert data to a percentage of monthly total
 datapercent = data / totaldata * 100
 #%% CLUSTERED BAR CHART - 12 NODE
+
+## SET PLOT A) PARAMETERS
+#define month labels and colors
 months = ("Oct", "Nov", "Dec", "Jan", "Feb", "Mar")
-# months = ("O", "N", "D", "J", "F", "M")
 colors = ('tomato','cornflowerblue','lightgreen','darkorchid','gold','lightblue','plum','mediumseagreen','indianred','royalblue','grey',(.9,0,.9))
-
-ymax = 110
-yint = 20
-
+ymax = 110 # max y 
+yint = 20 # y interval 
 x = np.arange(len(months))  # the label locations
 width = 1  # the width of the bars
-multiplier = 0
-
-# fig = plt.figure(figsize=(7, 13))
-fig, axs = plt.subplots(6, 3, figsize=(7, 11), height_ratios=[2.5, 0.2, 1, 1, 1, 1])
-for i in range(6):
-    for j in range(3):
+# define number of columns and rows for subplot
+numcols = 3
+numrows = 6
+# set heights for each row
+rowheights = [2.5, 0.2, 1, 1, 1, 1]
+# create figure
+fig, axs = plt.subplots(numrows, numcols, figsize=(7, 11), height_ratios=rowheights)
+# remove all axes so they aren't seen under plots
+for i in range(numrows):
+    for j in range(numcols):
         axs[i,j].axis('off')
         
-ax = fig.add_subplot(6,3,(1,3))
-bottom = np.zeros(len(months))
-
-fig.suptitle('a)',fontsize=11,fontweight="bold",y=0.99,x=0.03)
+## PLOT A) DATA
+ax = fig.add_subplot(numrows,numcols,(1,3)) #add subplot
+bottom = np.zeros(len(months)) # set bottom 'counters' for stacked histogram
+fig.suptitle('a)',fontsize=11,fontweight="bold",y=0.99,x=0.03) # add title
+# plot stacked data
 for i, node in enumerate(datapercent):
-    offset = width * multiplier
-    rects = ax.bar(x + offset, node, label=i+1, align='center', bottom=bottom, color=colors[i])
-    #ax.bar_label(rects, padding=3)
+    rects = ax.bar(x, node, label=i+1, align='center', bottom=bottom, color=colors[i])
     bottom += node
-
 # Add some text for labels, title and custom x-axis tick labels, etc.
 ax.set_ylabel('Percentage of Days in Month',fontweight='bold',labelpad=0)
 ax.yaxis.set_label_coords(-0.045,0.5)
 ax.set_xlabel('Month',fontweight='bold',labelpad=0)
-#ax.set_title('Node Frequency',fontweight='bold')
 ax.set_xticks(x, months)
 ax.legend(loc='upper center',ncols=numpatterns,columnspacing=0.7,handletextpad=0.25,fontsize=10)
 ax.set_ylim(0, ymax)
@@ -87,10 +82,10 @@ ax.set_yticks(np.arange(0,ymax,yint))
 ax.set_xlim(-0.5,5.5)
 ax.tick_params(direction='in',which='both',axis='y')
 
-#%%
-months_abb = ("O", "N", "D", "J", "F", "M")
-width = 0.8  # the width of the bars
 
+## SET PLOT B) PARAMETERS
+months_abb = ("O", "N", "D", "J", "F", "M") # x labels
+width = 0.8  # the width of the bars
 if clusters == 1:
     ymax = 50
     yint = 10
@@ -98,20 +93,18 @@ elif clusters == 5:
     ymax = 71
     yint = 15
 
+## PLOT B) DATA
 for i,node in enumerate(data):
-    perc_assigned = str(round(pat_prop[i]*100,1))
-    # precipavg = precip_rounded[i]
+    # perc_assigned = str(round(pat_prop[i]*100,1))
     node_rel = (node / pat_freq[i]) * 100
     round_node_rel = [ round(elem, 0) for elem in node_rel]
-    offset = width * multiplier
-    gbcolor = 1.1-(pat_freq[i]/44)
-    patfreq_col = (1,gbcolor,gbcolor)
-    ax = fig.add_subplot(6,3,i+7)
+    # add subplots
+    ax = fig.add_subplot(numrows,numcols,i+7)
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
         fontsize=10, fontweight='bold', verticalalignment='top', 
         bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
-    freqs = plt.bar(x + offset,height=round_node_rel,width=width,color=colors[i],label=i+1,align='center')
+    freqs = plt.bar(x,height=round_node_rel,width=width,color=colors[i],label=i+1,align='center')
     ax.bar_label(freqs, padding=3)
     ax.set_ylim(0, ymax)
     ax.set_xlim(-0.5,5.5)

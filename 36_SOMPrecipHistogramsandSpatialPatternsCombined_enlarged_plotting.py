@@ -4,12 +4,9 @@ Created on Mon Jun 12 13:49:49 2023
 
 @author: emrus2
 
-Here we will bin the days assigned to each IVT SOM together and then plot the
-composite precipitation pattern from GRIDMET
+Precipitation histograms for each node
 
-For a 9-node SOM
-
-UPDATED 6/12/2023
+UPDATED 7/11/2023
 """
 #%% IMPORT MODULES
 import netCDF4 as nc #if this doesn't work, try to reinstall in anaconda prompt using
@@ -24,33 +21,44 @@ from mpl_toolkits.basemap import Basemap #installed using
     #conda install -c anaconda basemap
 import scipy.io
 
-#%% DEFINE WATERSHED SHAPEFILE
-watershed = 'UpperYuba'
-ws_directory = f'I:\\Emma\\FIROWatersheds\\Data\\WatershedShapefiles\\California\\{watershed}\\'
-
-# determine if you want to plot IVT data
-IVT = True
-#%% IMPORT SOM AND GRIDMET DATA
-# change directory and import SOM data from .mat file
+#%% IMPORT SOM DATA
+# define metvar
+metvar = 'IVT'
 numpatterns = 12
 percentile = 90
 clusters = 5
-lettered = False
 
-# load in SOM data
-mat_dir='I:\\Emma\\FIROWatersheds\\Data'
+# change directory and import SOM data from .mat file
+mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
-soms = scipy.io.loadmat(f'SOMs\\SomOutput\\IVT_{percentile}_{numpatterns}sompatterns_{clusters}d.mat')
+soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}sompatterns_{clusters}d.mat')
+pat_prop = np.squeeze(soms['pat_prop'])
+pat_freq = np.squeeze(soms['pat_freq'])
 asn_err = np.squeeze(soms['assignment'])
 assignment = asn_err[:,0]
 
+#%% IMPORT WATERSHED SHAPEFILE
+watershed = 'UpperYuba'
+ws_directory = f'I:\\Emma\\FIROWatersheds\\Data\\WatershedShapefiles\\California\\{watershed}\\'
 
-# assignment = [float(x) for x in assignment]
+#%% IMPORT AVERAGE PRECIP DATA
+avgprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip_{clusters}d.npy')
+avgprecip_rounded = np.round(a=avgprecip,decimals=1)
 
+medprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignMedianPrecip_{clusters}d.npy')
+medprecip_rounded = np.round(a=medprecip,decimals=1)
+
+allprecip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAllPrecip_{clusters}d.npy',allow_pickle=True)
+
+#%% DEFINE SPATIAL MAPPING PARAMETERS
+IVT = True # plot IVT vectors
 # define lat, lon region of data for plotting
 latmin, latmax = (37.5,41.5)
 lonmin, lonmax = (-124.5,-119.5)
-#%%
+#define area threshold for basemap
+area_thresh = 1E4
+
+#%% IMPORT NETCDF DATA
 #IMPORT NETCDF DATA
 #define NC location
 filepath = ('I:\\Emma\\FIROWatersheds\\Data\\Gridmet\\GRIDMET_pr_Yuba_Extremes90_DailyAnomProp_1980-2021_WINTERDIST.nc')
@@ -79,9 +87,7 @@ merrareduced = merrareduced[:,:,lonind]
 
 #convert lat and lon into a 2D array
 lon, lat = np.meshgrid(lonreduced,latreduced)
-#define area threshold for basemap
-area_thresh = 1E4
-    
+
 #%% CLUSTER ASSIGNED PATTERNS AND CALCULATE AVERAGE
 
 # create array to store 12 SOM composites
@@ -104,6 +110,7 @@ for som in range(numpatterns):
     som_mean = np.squeeze(np.mean(som_merra,axis=0))
     # append to array of composites
     som_composites[som] = som_mean
+
 #%% DETERMINE MAX AND MIN VALIUES
 zmax = 0
 zmin = 1E8
@@ -115,7 +122,6 @@ for i, arr in enumerate(som_composites):
     #determine zmax and zmin for all days
     highlim = np.nanmax(arr)
     lowlim = np.nanmin(arr)
-    print(lowlim,highlim)
     if highlim > zmax:
         zmax = highlim
     if lowlim < zmin:
@@ -123,7 +129,7 @@ for i, arr in enumerate(som_composites):
 
 print(f'Lowest Value:{zmin} \nHighest Value:{zmax}')
 
-#%%
+#%% IMPORT IVT DATA
 if IVT == True:
     # IMPORT MERRA2 DATA
     metvar = 'IVT'
@@ -184,34 +190,116 @@ if IVT == True:
         U_composites[som] = U_mean
         V_composites[som] = V_mean
 
-#%% PLOT NODES from MATLAB
+#%% PLOTTING PRECIPITATION HISTOGRAMS
 
-#create subplot for mapping multiple timesteps
-if lettered == True:
-    fig = plt.figure(figsize=(7.2,7)) #width,height
-    fig.suptitle('b)',fontsize=11,fontweight="bold",y=0.997,x=0.07)
-else:
-    fig = plt.figure(figsize=(7.2,6.9)) #width,height
+## SET PLOT A) PARAMETERS
+colors = ('tomato','cornflowerblue','lightgreen','darkorchid','gold','lightblue','plum','mediumseagreen','indianred','royalblue','grey',(.9,0,.9))
+binlist = [np.arange(50,240,10)] # define bins
+width = 0.8  # the width of the bars
+
+# define number of columns and rows for subplot
+numcols = 33
+numrows = 9
+# set heights for each row
+arows = 1
+seprows = 0.25
+brows = 1
+rowheights = [arows,arows,arows,arows,seprows,brows,brows,brows,brows]
+# create figure
+fig, axs = plt.subplots(numrows, numcols, figsize=(7, 13), height_ratios=rowheights)
+# remove all axes so they aren't seen under plots
+for i in range(numrows):
+    for j in range(numcols):
+        axs[i,j].axis('off')
+
+# set plotting details  
+ymin = 0     
+ymax = 19
+yint = 4 
+ylabels = np.arange(ymin,ymax-1,yint)
+
+xmin = 45 
+xmax = 215
+xint = 25  
+xlabels = np.arange(xmin+5,xmax,xint)      
+        
+## PLOT A) DATA
+fig.suptitle('a)',fontsize=12,fontweight="bold",y=0.995,x=0.03) # add title
+for i,node in enumerate(allprecip):
+    locations = [1,2,3,5,6,7,9,10,11,13,14,15]
+    #add subplot
+    startloc = 11*i + 1
+    endloc = 11*(i+1)
+    ax = fig.add_subplot(numrows,numcols,(startloc,endloc))
+    precipavg = avgprecip_rounded[i]
+    precipmed = medprecip_rounded[i]
+    #create colors
+    precipmednorm = 0.9-(((precipmed-min(medprecip_rounded))/(max(medprecip_rounded)+7-min(medprecip_rounded))))
+    precipmed_col = (1,precipmednorm,1)
+    precipavgnorm = 0.8-(((precipavg-min(avgprecip_rounded))/(max(avgprecip_rounded)+7-min(avgprecip_rounded))))
+    precipavg_col = (precipavgnorm,1,precipavgnorm)
+    # define label location and text
+    sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
+    ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
+        fontsize=11, fontweight='bold', verticalalignment='top',
+        bbox=dict(facecolor='1', alpha = 0.8, edgecolor='none', pad=1.5),zorder=3)
+    ax.text(x=0.78, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
+        fontsize=9, fontweight='bold', verticalalignment='top', color = 'k',
+        bbox=dict(facecolor=precipavg_col, edgecolor='none', pad=1.5),zorder=3)
+    ax.text(x=0.78, y=0.87, s=precipmed, transform=ax.transAxes + sublabel_loc,
+        fontsize=9, fontweight='bold', verticalalignment='top', color = 'k',
+        bbox=dict(facecolor=precipmed_col, edgecolor='none', pad=1.5),zorder=3)
+    # plot data histogram
+    freqs = plt.hist(node,color=colors[i],label=i+1,align='mid',bins=binlist[0])
+    # plot mean and median line markers
+    plt.axvline(x=precipmed,color=(1,0,1))
+    plt.axvline(x=precipavg,color=(0,1,0))    
+    # set plot mins and maxs
+    ax.set_ylim(ymin, ymax)
+    ax.set_xlim(xmin,xmax)
+    # add x and y labels
+    if i in range(0,7,3):
+        ax.set_yticks(ylabels)
+        ax.set_xticks(xlabels, [])
+        if i == 3:
+            ax.set_ylabel('Days',fontweight='bold',fontsize=10)
+            ax.yaxis.set_label_coords(-0.12,-0.1)
+    elif i == numpatterns-2 or i == numpatterns-1:
+        ax.set_yticks(ylabels,[],fontsize=9)
+        ax.set_xticks(xlabels,fontsize=9)
+        if i == numpatterns-2:
+            ax.set_xlabel('Precipitation (mm)',fontweight='bold',fontsize=10)
+    elif i == numpatterns-3:
+        ax.set_yticks(ylabels,fontsize=9)
+        ax.set_xticks(xlabels,fontsize=9)
+    else:
+        ax.set_yticks(ylabels,[])
+        ax.set_xticks(xlabels, [])
+    ax.tick_params(direction='in',which='both',axis='y')
+
+## PLOT B) DATA
 lowlim = 2.8
 highlim = 18
-
+# create colormap
 colors = ['lightyellow',"yellow",'greenyellow',"limegreen","lightseagreen",'royalblue','mediumblue','#7400E0','#B800E0','#E0ADB1'] #,'mediumorchid','#A600E0','pink']
 colormap = LinearSegmentedColormap.from_list("mycmap", colors)
 
 for i, arr in enumerate(som_composites):
-    #MAP DESIRED VARIABLE
-    #convert lat and lon into a 2D array
-    #define area threshold for basemap
-    area_thresh = 1E4
     #create equidistant cylindrical projection basemap
     map = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,\
               urcrnrlon=lonmax,resolution='l',area_thresh=area_thresh)
     xi, yi = map(lon,lat)
-    ax = fig.add_subplot(4,3,i+1)
+    locations = [166,176,186,199,209,219,232,242,252,265,275,285]
+    startloc2 = locations[i]
+    endloc2 = locations[i] + 9
+    ax = fig.add_subplot(numrows,numcols,(startloc2,endloc2))
+    
+    if i == 0:
+        ax.set_title('b)',fontsize=12,fontweight="bold",y=0.9,x=-0.16)
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
     ax.text(0.0, 1.0, i+1, transform=ax.transAxes + sublabel_loc,
-        fontsize=10, fontweight='bold', verticalalignment='top', 
-        bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=11)
+        fontsize=11, fontweight='bold', verticalalignment='top', 
+        bbox=dict(facecolor='1', edgecolor='none', alpha=0.8, pad=1.5),zorder=11)
     #create colormap of MERRA2 data
     colorm = map.pcolor(xi,yi,arr,shading='auto',cmap=colormap,vmin=lowlim,vmax=highlim,zorder=1)
     
@@ -222,7 +310,7 @@ for i, arr in enumerate(som_composites):
     map.drawcoastlines(color=border_c, linewidth=border_w)
     map.drawstates(color=border_c, linewidth=border_w)
     map.drawcountries(color=border_c, linewidth=border_w)
-    gridlinefont = 8.5
+    gridlinefont = 9
     parallels = np.arange(38.,42.,1.)
     meridians = np.arange(-124.,-119.,2.)
     if i in range(0,7,3):
@@ -254,38 +342,22 @@ for i, arr in enumerate(som_composites):
                              scale=size, scale_units='inches',headlength=5,headwidth=3, \
                                  color='k',width=0.007,alpha=0.7,zorder=10)
 
-    #create contour map
-    #contourm = map.contour(xi,yi,arr,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart[metvar],highlims[metvar]+1,contourint[metvar]),zorder=2)
-    #plt.clabel(contourm,levels=contourm.levels[::2],fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
-        
     #add yuba shape
-    # map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed)
     map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,color='k',linewidth=0.6)
-    #plt.scatter(-120.9,39.5,color='tomato',edgecolors='r',marker='*',linewidths=0.8,zorder=4)
     
-#CUSTOMIZE SUBPLOT SPACING
-if lettered == True:
-    fig.subplots_adjust(left=0.05,right=0.908,bottom=0.02, top=0.975,hspace=0.05, wspace=0.05) #bottom colorbar
-else:
-    fig.subplots_adjust(left=0.05,right=0.908,bottom=0.026, top=0.985,hspace=0.05, wspace=0.05) #bottom colorbar
-#fig.add_axis([left,bottom, width,height])
-cbar_ax = fig.add_axes([0.92,0.05,0.025,0.9]) #bottom colorbar
+    # fig.subplots_adjust(left=0.05,right=0.908,bottom=0.02, top=0.975,hspace=0.05, wspace=0.05) #bottom colorbar
+cbar_ax = fig.add_axes([0.911,0.02,0.025,0.46]) #[xloc, yloc, xwidth, yheight]
 cbar = fig.colorbar(colorm, cax=cbar_ax,ticks=np.arange(4,highlim+1,2),orientation='vertical')
-cbar.ax.tick_params(labelsize=8)
-cbar.set_label('Proportion of Monthly Average',fontsize=8.5,labelpad=1,fontweight='bold')
+cbar.ax.tick_params(labelsize=9)
+cbar.set_label('Proportion of Monthly Average',fontsize=10,labelpad=3,fontweight='bold')
 
     
-#SHOW MAP
-save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs\\Composites'
+#CUSTOMIZE SUBPLOT SPACING
+fig.subplots_adjust(left=0.07,right=0.985,bottom=0.014, top=0.995,hspace=0.05, wspace=0.5) #bottom colorbar
+# fig.subplots_adjust(left=0.065,right=0.985,bottom=0.082, top=0.968,hspace=0.05, wspace=0.05) #bottom colorbar
+
+
+save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
 os.chdir(save_dir)
-if lettered == True:
-    if IVT == True:
-        plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_IVT_{numpatterns}SOM_composite_{clusters}d_lettered.png',dpi=300)
-    else:
-        plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_{numpatterns}SOM_composite_{clusters}d_lettered.png',dpi=300)
-else:
-    if IVT == True:
-        plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_IVT_{numpatterns}SOM_composite_{clusters}d.png',dpi=300)
-    else:
-        plt.savefig(f'GRIMET_PrecipitiationMonthlyProportion_{numpatterns}SOM_composite_{clusters}d.png',dpi=300)
+plt.savefig(f'PrecipHistograms_and_SpatialPrecipPatterns_{clusters}d_{numpatterns}node_test',dpi=300)
 plt.show()
