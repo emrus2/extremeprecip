@@ -14,6 +14,7 @@ Saved files:
 """
 #import required packages
 import os
+import numpy as np
 import xarray as xr
 
 #define filepath and file of daily mean total precipitation
@@ -35,6 +36,11 @@ percentile = 90
 #calculate 90th percentile threshold
 percent_90 = NCdatawinter.quantile(percentile/100)
 print(percent_90)
+threshold = percent_90.values
+# print(threshold) #51.53 mm
+# savepath = 'I:\\Emma\\FIROWatersheds\\Data\\'
+# np.save(os.path.join(savepath,'90percentilethreshold.npy'),threshold)
+
 
 #Calculate extreme days as those exceeding 95th percentile
 extremes_winter = NCdatawinter.where(NCdatawinter>percent_90)

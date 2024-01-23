@@ -243,10 +243,10 @@ for i,node in enumerate(allprecip):
     ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
         fontsize=11, fontweight='bold', verticalalignment='top',
         bbox=dict(facecolor='1', alpha = 0.8, edgecolor='none', pad=1.5),zorder=3)
-    ax.text(x=0.78, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
+    ax.text(x=0.8, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
         fontsize=9, fontweight='bold', verticalalignment='top', color = 'k',
         bbox=dict(facecolor=precipavg_col, edgecolor='none', pad=1.5),zorder=3)
-    ax.text(x=0.78, y=0.87, s=precipmed, transform=ax.transAxes + sublabel_loc,
+    ax.text(x=0.8, y=0.87, s=precipmed, transform=ax.transAxes + sublabel_loc,
         fontsize=9, fontweight='bold', verticalalignment='top', color = 'k',
         bbox=dict(facecolor=precipmed_col, edgecolor='none', pad=1.5),zorder=3)
     # plot data histogram
