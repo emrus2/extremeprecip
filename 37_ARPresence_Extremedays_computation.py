@@ -4,6 +4,7 @@ Created on Mon Jan 22 15:35:52 2024
 
 @author: emrus2
 """
+#%% IMPORT PACKAGES
 import os
 import netCDF4 as nc
 import numpy as np
@@ -43,42 +44,10 @@ gridlatreduced = gridlat[latind]
 lonlims = np.logical_and(gridlon > lonmin, gridlon < lonmax)
 lonind = np.where(lonlims)[0]
 gridlonreduced = gridlon[lonind]
-# reduce ar detection data
-# artestreduced = arindicator[:,latind,:]
-# artestreduced = artestreduced[:,:,lonind]
-
 
 #%% convert time from hours to datetimes
 dates = [datetime.strftime(datetime(1950,1,1)+timedelta(hours=time[n]),"%Y%m%d") for n in range(time.shape[0])]
-#%%
-# for i in range(20):
-#     artest = artestreduced[i,:,:]
-#     fig = plt.figure(figsize=(7.2,5.1))
-#     plt.title(time[i])
-#     #MAP DESIRED VARIABLE
-#     #convert lat and lon into a 2D array
-#     lon, lat = np.meshgrid(gridlonreduced,gridlatreduced)  
-#     #define area threshold for basemap
-#     area_thresh = 1E4
-#     #create equidistant cylindrical projection basemap
-#     map = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,\
-#               urcrnrlon=lonmax,resolution='c',area_thresh=area_thresh)
-#     xi, yi = map(lon,lat)
-#     border_c = '0.4'
-#     border_w = 0.4
-#     #create map features
-#     map.drawcoastlines(color=border_c, linewidth=border_w,zorder=2)
-#     map.drawstates(color=border_c, linewidth=border_w,zorder=2)
-#     map.drawcountries(color=border_c, linewidth=border_w,zorder=2)
-    
-    
-#     #create colormap of MERRA2 data
-#     colorm = map.pcolor(xi,yi,artest,shading='auto')
-#     #define border color and thickness
-    
-#     plt.show()
-    
-#%%
+#%% REDUCE CATALOG TO EXTREME DAYS
 # import extreme dates of upper yuba
 extremedates = np.load('I:/Emma/FIROWatersheds/Data/90Percentile_ExtremeDays.npy',allow_pickle=True)
 
@@ -109,49 +78,51 @@ for i,arr in enumerate(days_summed):
 artestreduced = ar_extremedays[:,latind,:]
 artestreduced = artestreduced[:,:,lonind]
 
-#%% 
+#%% IDENTIFY AR ACTIVITY
 # reduce data to only watershed gridcells
 arwatershed = ar_extremedays[:,102,:]
-# arwatershed = np.expand_dims(arwatershed, 1)
 arwatershed = arwatershed[:,21:23]
 
-#%% 
-
+# add up all gridcells for each day
 arwatershedsum = np.sum(arwatershed,axis=1)
+# if gridcells > 0, ar is present, which means True
 arpresence = arwatershedsum > 0
 
+# combine ar presence data with dates data
 dates_arpresence = np.array(list(zip(catextremes,arpresence)))
 
+# save as numpy array
 savefolder = 'I:/Emma/FIROWatersheds/Data/'
 np.save(os.path.join(savefolder,'ARPresence_90_Percentile_Days.npy'),dates_arpresence)
+
 #%%
-# plot
-for i,j in enumerate(catextremes):
-    artest = artestreduced[i,:,:]
-    fig = plt.figure(figsize=(7.2,5.1))
-    plt.title(j)
-    #MAP DESIRED VARIABLE
-    #convert lat and lon into a 2D array
-    lon, lat = np.meshgrid(gridlonreduced,gridlatreduced)  
-    #define area threshold for basemap
-    area_thresh = 1E4
-    #create equidistant cylindrical projection basemap
-    map = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,\
-              urcrnrlon=lonmax,resolution='c',area_thresh=area_thresh)
-    xi, yi = map(lon,lat)
-    border_c = '0.4'
-    border_w = 0.4
-    #create map features
-    map.drawcoastlines(color=border_c, linewidth=border_w,zorder=2)
-    map.drawstates(color=border_c, linewidth=border_w,zorder=2)
-    map.drawcountries(color=border_c, linewidth=border_w,zorder=2)
+# # plot
+# for i,j in enumerate(catextremes):
+#     artest = artestreduced[i,:,:]
+#     fig = plt.figure(figsize=(7.2,5.1))
+#     plt.title(j)
+#     #MAP DESIRED VARIABLE
+#     #convert lat and lon into a 2D array
+#     lon, lat = np.meshgrid(gridlonreduced,gridlatreduced)  
+#     #define area threshold for basemap
+#     area_thresh = 1E4
+#     #create equidistant cylindrical projection basemap
+#     map = Basemap(projection='cyl',llcrnrlat=latmin,urcrnrlat=latmax,llcrnrlon=lonmin,\
+#               urcrnrlon=lonmax,resolution='c',area_thresh=area_thresh)
+#     xi, yi = map(lon,lat)
+#     border_c = '0.4'
+#     border_w = 0.4
+#     #create map features
+#     map.drawcoastlines(color=border_c, linewidth=border_w,zorder=2)
+#     map.drawstates(color=border_c, linewidth=border_w,zorder=2)
+#     map.drawcountries(color=border_c, linewidth=border_w,zorder=2)
     
-    map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,zorder=6,color='w')
-    plt.scatter(120.9,39.5,color='w',marker='*',linewidths=0.7,zorder=4)
+#     map.readshapefile(os.path.join(ws_directory,f'{watershed}'), watershed,zorder=6,color='w')
+#     plt.scatter(120.9,39.5,color='w',marker='*',linewidths=0.7,zorder=4)
 
 
-    #create colormap of MERRA2 data
-    colorm = map.pcolor(xi,yi,artest,shading='auto')
-    #define border color and thickness
+#     #create colormap of MERRA2 data
+#     colorm = map.pcolor(xi,yi,artest,shading='auto')
+#     #define border color and thickness
     
-    plt.show()
+#     plt.show()
