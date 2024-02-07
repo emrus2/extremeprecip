@@ -20,6 +20,7 @@ from mpl_toolkits.basemap import Basemap #installed using
     #conda install -c anaconda basemap
 import scipy.io
 
+#%%
 #define watershed and directory for plotting
 watershed = 'UpperYuba'
 ws_directory = f'I:\\Emma\\FIROWatersheds\\Data\\WatershedShapefiles\\California\\{watershed}\\'
@@ -49,6 +50,10 @@ lonmin, lonmax = (-170.25,-105.75)
 #%% IMPORT AVERAGE PRECIP DATA
 precip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip_{clusters}d.npy')
 precip_rounded = np.round(a=precip,decimals=1)
+
+#%% IMPORT AR FREQUENCY DATA
+arsomfreq = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\ARFrequencies_{numpatterns}node_{clusters}d_to2021.npy')
+arsomfreq_rounded = np.round(a=arsomfreq,decimals=0)
 
 #%% DETERMINE MAX AND MIN VALIUES
 zmax = 0
@@ -123,6 +128,9 @@ for i, arr in enumerate(patterns):
             ax.text(x=0.005, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
                 fontsize=9, fontweight='bold', verticalalignment='top', color = 'k',
                 bbox=dict(facecolor=precip_col, edgecolor='none', pad=1.5),zorder=3)
+            ax.text(x=0.4, y=1.0, s='{:.0f}%'.format(arsomfreq_rounded[i]), transform=ax.transAxes + sublabel_loc,
+                fontsize=9, fontweight='bold',verticalalignment='top', color = 'k',
+                bbox=dict(facecolor='cornflowerblue', edgecolor='none', pad=1.5),zorder=3)
             ax.text(x=xloc, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
                 fontsize=9, fontweight='bold',verticalalignment='top', color = 'k',
                 bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
@@ -182,5 +190,5 @@ cbar.set_label(cbarlabs,fontsize=9.5,labelpad=0.5,fontweight='bold')
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
 os.chdir(save_dir)
-# plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d_vert.png',dpi=300)
+plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d_vert_arfreq.png',dpi=300)
 plt.show()

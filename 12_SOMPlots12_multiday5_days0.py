@@ -52,6 +52,10 @@ lonmin, lonmax = (-170.25,-105.75)
 precip = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}Percentile_{numpatterns}NodeAssignAvergagePrecip_{clusters}d.npy')
 precip_rounded = np.round(a=precip,decimals=1)
 
+#%% IMPORT AR FREQUENCY DATA
+arsomfreq = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\ARFrequencies_{numpatterns}node_{clusters}d_to2021.npy')
+arsomfreq_rounded = np.round(a=arsomfreq,decimals=0)
+
 #%% DETERMINE MAX AND MIN VALIUES
 zmax = 0
 zmin = 1E8
@@ -112,11 +116,14 @@ for i, arr in enumerate(patterns):
     ax.text(x=0.0, y=1.0, s=i+1, transform=ax.transAxes + sublabel_loc,
         fontsize=10, fontweight='bold', verticalalignment='top', 
         bbox=dict(facecolor='1', edgecolor='none', pad=1.5),zorder=3)
+    ax.text(x=0.43, y=1.0, s='{:.0f}%'.format(arsomfreq_rounded[i]), transform=ax.transAxes + sublabel_loc,
+        fontsize=9, fontweight='bold',verticalalignment='top', color = 'k',
+        bbox=dict(facecolor='cornflowerblue', edgecolor='none', pad=1.5),zorder=3)
     if len(perc_assigned) == 4:
         xloc = 0.73
     else:
         xloc = 0.77
-    ax.text(x=0.37, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
+    ax.text(x=0.15, y=1.0, s=precipavg, transform=ax.transAxes + sublabel_loc,
         fontsize=9, fontweight='bold', verticalalignment='top', color = 'k',
         bbox=dict(facecolor=precip_col, edgecolor='none', pad=1.5),zorder=3)
     ax.text(x=xloc, y=1.0, s=f'{perc_assigned}%', transform=ax.transAxes + sublabel_loc,
@@ -171,5 +178,5 @@ cbar.set_label(cbarlabs,fontsize=8.5,labelpad=0.5,fontweight='bold')
 #SHOW MAP
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
 os.chdir(save_dir)
-plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d_sm.png',dpi=300)
+plt.savefig(f'{metvar}_{percentile}_{numpatterns}SOM_{clusters}d_sm_arfreq.png',dpi=300)
 plt.show()
