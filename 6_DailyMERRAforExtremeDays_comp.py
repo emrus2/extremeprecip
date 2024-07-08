@@ -68,7 +68,7 @@ for n in range(precip.shape[0]):
 
 #%% DEFINE EXTREME MERRA2 FILES
 #define files of interest
-metvars = ['Z850']
+metvars = ['IVT']
 metpath = {'Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressure_3hourly','IVT':'IVT_daily', \
                '300W':'East_and_North_wind_components_at_300_hPa','850T':'Temperature_at_850_hPa_3hourly', \
                    'Z850':'850_hPa_Geopotential_Height_3hourly','850W':'East_and_North_wind_components_at_850_hPa'}
