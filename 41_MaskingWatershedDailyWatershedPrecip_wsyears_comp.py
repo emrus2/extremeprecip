@@ -95,7 +95,7 @@ feature = shp.shapes()
 
 
 #IMPORT NETCDF DATA
-year = "2023"
+year = "2024"
 nc_filename = (f'pr_{year}.nc')
 nc_directory = 'I:\\GRIDMET\\pr\\'
 nc_path = os.path.join(nc_directory,nc_filename)

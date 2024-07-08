@@ -19,20 +19,21 @@ os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj
 import scipy.io
 #%% IMPORT SOM DATA
 metvar = 'IVT'
-numpatterns = 9
+numpatterns = 12
 percentile = 90
+clusters = 5
 
 # change directory and import SOM data from .mat file
 mat_dir='I:\\Emma\\FIROWatersheds\\Data\\SOMs\\SomOutput'
 os.chdir(mat_dir)
-soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}_sompatterns.mat')
+soms = scipy.io.loadmat(f'{metvar}_{percentile}_{numpatterns}sompatterns_{clusters}d.mat')
 pat_prop = np.squeeze(soms['pat_prop'])
 #%% IMPORT EVENT DATA
 data_dir='I:\\Emma\\FIROWatersheds\\Data\\'
 os.chdir(data_dir)
-alleventdates = np.load(f'{percentile}Percentile_{numpatterns}NodeClusteredEvents.npy',allow_pickle=True)
-alleventnodes = np.load(f'{percentile}Percentile_{numpatterns}NodeClusteredEventsNodes.npy',allow_pickle=True)
-alleventprecip = np.load(f'{percentile}Percentile_{numpatterns}NodeClusteredEventsPrecip.npy',allow_pickle=True)
+alleventdates = np.load(f'{percentile}Percentile_{clusters}d_{numpatterns}NodeClusteredEvents.npy',allow_pickle=True)
+alleventnodes = np.load(f'{percentile}Percentile_{clusters}d_{numpatterns}NodeClusteredEventsNodes.npy',allow_pickle=True)
+alleventprecip = np.load(f'{percentile}Percentile_{clusters}d_{numpatterns}NodeClusteredEventsPrecip.npy',allow_pickle=True)
 
 #%% CALCULATE THE PATH FREQUENCY TO PLOT WIDTH BASED ON IT
 
@@ -67,9 +68,9 @@ def pathfreq(node):
         nodecounts.append(new_count)
     return(nodecounts)    
 #%% SUBPLOTS OF NODES
-colors = ('tomato','indianred','gold','lightgreen','mediumseagreen','cornflowerblue','royalblue','plum','darkorchid','magenta','tomato','indianred','gold','lightgreen','mediumseagreen','cornflowerblue','royalblue','plum','darkorchid','magenta')
+colors = ('tomato','cornflowerblue','lightgreen','darkorchid','gold','lightblue','plum','mediumseagreen','indianred','royalblue','grey',(.9,0,.9))
 
-fig = plt.figure(figsize=(7.2,5))
+fig = plt.figure(figsize=(7,7))
 #fig.suptitle('Event Node Succession',fontsize=13,fontweight="bold",y=0.9875)
 
 for node in np.arange(numpatterns):
@@ -80,7 +81,7 @@ for node in np.arange(numpatterns):
     precipaccum = []
     avgprecipaccum = []
     #perc_assigned = round(pat_prop[node]*100,1)
-    ax = fig.add_subplot(3,3,node+1)
+    ax = fig.add_subplot(4,3,node+1)
     ax.set_zorder(2)
     ax.set_facecolor('none')
     sublabel_loc = mtransforms.ScaledTranslation(4/72, -4/72, fig.dpi_scale_trans)
@@ -149,8 +150,8 @@ for node in np.arange(numpatterns):
     nodedurationaverage = np.mean(nodeduration)
     #plt.axvline(nodedurationaverage,color='magenta',alpha=0.8,zorder=1)
     #ax.annotate(f'{round(nodedurationaverage,2):.2f}',xy=(5.5,0.9),color='magenta',fontsize='9',fontweight='bold',zorder=3)
-    nodedurnorm = 1.6 - nodedurationaverage
-    nodedurnorm = 0.9-(((nodedurationaverage-1.13)/0.5))
+    # nodedurnorm = 1.6 - nodedurationaverage
+    nodedurnorm = 1- (nodedurationaverage/2.6)    # nodedurnorm = 0.2
     nodedur_col = (1,nodedurnorm,1)
     print(nodedur_col)
     ax.text(x=0.805, y=0.14, s=f'{round(nodedurationaverage,2):.2f}', transform=ax.transAxes + sublabel_loc,
@@ -164,19 +165,26 @@ for node in np.arange(numpatterns):
         fontsize=8, fontweight='bold',verticalalignment='top', color = 'k',
         bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
     # adjust plotting       
-    ax.set_ylim(0.5, numpatterns+0.8)
+    ax.set_ylim(0.5, numpatterns+1)
     ax.set_xlim(0.5,6.5)
     ylabels = np.arange(1,numpatterns+1,1)
     xlabels = np.arange(1,7,1)
-    if node in np.arange(6):
-        ax.set_yticks(ylabels)
+    if node in np.arange(9):
         ax.set_xticks(xlabels, [])
+        if node in np.arange(0,9,3):
+            ax.set_yticks(ylabels)
+        else:
+            ax.set_yticks(ylabels, [])
         if node == 3:
-            ax.set_ylabel('Node',fontweight='bold')
+            ax.set_ylabel('Node',fontweight='bold', y=-0.02)
     else:
-        ax.set_yticks(ylabels)
         ax.set_xticks(xlabels)
-        if node == 7:
+        if node in np.arange(10,12):
+            ax.set_yticks(ylabels,[])
+        else:
+            ax.set_yticks(ylabels)
+        
+        if node == 10:
             ax.set_xlabel('Duration (Days)',fontweight='bold')
     ax.tick_params(direction='in',which='both',axis='y')
     #ax.grid(visible=True,axis='y')
@@ -188,20 +196,20 @@ for node in np.arange(numpatterns):
     ax2.bar(np.arange(1,maxnodeduration+1),avgprecip_accum,color='slategrey',alpha=0.4,width=1)
     ax2.set_ylim(0.5, 650)
     ylabels = np.arange(0,670,100)
-    if node in np.arange(2,9,3):
+    if node in np.arange(2,12,3):
         ax2.set_yticks(ylabels,minor='true')
         if node == 5:
-            ax2.set_ylabel('Precipitation (mm)',fontweight='bold')
+            ax2.set_ylabel('Precipitation (mm)',fontweight='bold',y=-0.02)
     else:
         ax2.set_yticks(ylabels,[],minor='true')
         ax2.set_yticklabels([])
     ax2.tick_params(direction='in',which='both',axis='y')
 
 #CUSTOMIZE SUBPLOT SPACING
-fig.subplots_adjust(left=0.051,right=0.93,bottom=0.085, top=0.985,hspace=0.05, wspace=0.09) #bottom colorbar
+fig.subplots_adjust(left=0.055,right=0.92,bottom=0.085, top=0.985,hspace=0.05, wspace=0.09) #bottom colorbar
 
 
 save_dir='I:\\Emma\\FIROWatersheds\\Figures\\NodeHistograms'
 os.chdir(save_dir)
-# plt.savefig('test.png',dpi=300)
+plt.savefig(f'NodePatternProgressions_{clusters}d_{numpatterns}Patterns.png',dpi=300)
 plt.show()

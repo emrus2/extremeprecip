@@ -19,13 +19,14 @@ threshold = np.load(os.path.join(savepath,'90percentilethreshold.npy'))
 threshold = float(threshold)
 
 #%% OPEN 2022-2023 DATA
+years = [2023,2024]
 gridmetpath = 'I:\\Emma\\FIROWatersheds\\Data\\GRIDMET\\'
-pr_22 = list(np.load(os.path.join(gridmetpath,'UpperYubadailymeanprecip_2022.npy')))
-pr_23 = list(np.load(os.path.join(gridmetpath,'UpperYubadailymeanprecip_2023.npy')))
+pr_22 = list(np.load(os.path.join(gridmetpath,f'UpperYubadailymeanprecip_{str(years[0])}.npy')))
+pr_23 = list(np.load(os.path.join(gridmetpath,f'UpperYubadailymeanprecip_{str(years[1])}.npy')))
 # combine pr data
 pre_2223 = pr_22 + pr_23
 # write dates data
-dates = [datetime.strftime(datetime(2022,1,1)+timedelta(days=n),"%Y%m%d") for n in range(len(pre_2223))]
+dates = [datetime.strftime(datetime(years[0],1,1)+timedelta(days=n),"%Y%m%d") for n in range(len(pre_2223))]
 # write months data
 precipmonths = [item[4:6] for item in dates]
 
