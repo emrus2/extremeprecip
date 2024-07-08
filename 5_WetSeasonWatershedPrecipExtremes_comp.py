@@ -53,6 +53,6 @@ NCdatawinter.plot.line(marker='o',lw=0,markersize=2)
 extremes_winter.plot.line(marker='o',lw=0,markersize=2)
 
 #save values to nc files
-# newfolder = f'I:\\Emma\\FIROWatersheds\\Data\\Gridmet\\{watershed}\\Extremes'
-# NCdatawinter.to_netcdf(os.path.join(folderpath,f'{watershed}DailymeansWINTERTOTAL_1980_2021.nc'))
-# extremes_winter.to_netcdf(os.path.join(newfolder,f'{watershed}DailymeanWINTEREXTREMES{percentile}_1980_2021.nc'))
+newfolder = f'I:\\Emma\\FIROWatersheds\\Data\\Gridmet\\{watershed}\\Extremes'
+NCdatawinter.to_netcdf(os.path.join(folderpath,f'{watershed}DailymeansWINTERTOTAL_1980_2021.nc'))
+extremes_winter.to_netcdf(os.path.join(newfolder,f'{watershed}DailymeanWINTEREXTREMES{percentile}_1980_2021.nc'))
