@@ -43,7 +43,9 @@ pat_prop = np.squeeze(soms['pat_prop'])
 asn_err = np.squeeze(soms['assignment'])
 assignment = asn_err[:,0]
 
-extremeassign = np.load('90Percentile_ExtremeDaysand9NodeAssign.npy')
+extremeevents = list(np.load(f'I:\\Emma\\FIROWatersheds\\Data\\ExtremeEvents_{clusters}d.npy', \
+                             allow_pickle=True))
+extremeassign = list(zip(extremeevents,assignment))
 
 # define lat, lon region of data for plotting
 latmin, latmax = (15.5,65.5)
