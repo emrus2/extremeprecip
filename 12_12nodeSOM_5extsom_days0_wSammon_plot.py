@@ -14,7 +14,8 @@ UPDATED 6/12/2023
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+from matplotlib import colormaps
 import matplotlib.cm as cm
 import matplotlib.transforms as mtransforms
 os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj")
@@ -154,8 +155,13 @@ for i, arr in enumerate(denordata):
     #     bbox=dict(facecolor=patfreq_col, edgecolor='none', pad=1.5),zorder=3)
 
     #create colormap of MERRA2 data
-    colorm = map.pcolor(xi,yi,merrareduced,shading='auto',cmap=colormap,vmin=lowlims,vmax=highlims,zorder=1)
-    
+    n_lines = 15
+    cmap = colormaps[colormap]
+    # Take colors at regular intervals spanning the colormap.
+    colors = cmap(np.linspace(0, 1, n_lines))
+    colors = np.delete(colors,0,axis=0)
+    cmap = ListedColormap(colors)
+    colorm = map.pcolor(xi,yi,merrareduced,shading='auto',cmap=cmap,vmin=lowlims,vmax=highlims,zorder=1)
     #define border color and thickness
     border_c = '0.4'
     border_w = 0.4
@@ -182,6 +188,7 @@ for i, arr in enumerate(denordata):
     contour_c = '0.1'
     contour_w = 0.7
     #create contour map
+    
     contourm = map.contour(xi,yi,merrareduced,colors=contour_c,linewidths=contour_w,levels=np.arange(contourstart,highlims+1,contourint),zorder=2)
     plt.clabel(contourm,levels=np.arange(contourstart,highlims+1,contourint*2),fontsize=6,inline_spacing=1,colors='k',zorder=2,manual=False)
         
@@ -228,7 +235,21 @@ cbar.ax.tick_params(labelsize=9)
 cbar.set_label(cbarlabs,fontsize=10,labelpad=0.5,fontweight='bold')
 
 # save figure
-save_dir='I:\\Emma\\FIROWatersheds\\Figures\\SOMs'
+save_dir='I:\\Emma\\FIROWatersheds\\figures\\SOMs'
 os.chdir(save_dir)
-plt.savefig('5day_Days0_Sammoncombined.png',dpi=300)
+plt.savefig('5day_Days0_Sammoncombined_noncontinuous.png',dpi=300)
+plt.show()
+
+#%%
+n_lines = 21
+cmap = colormaps[colormap]
+
+# Take colors at regular intervals spanning the colormap.
+colors = cmap(np.linspace(0, 1, n_lines))
+
+fig, ax = plt.subplots(layout='constrained')
+
+for i, color in enumerate(colors):
+    ax.plot([0, i], color=color)
+
 plt.show()

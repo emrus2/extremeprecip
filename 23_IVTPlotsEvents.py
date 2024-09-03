@@ -17,7 +17,11 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import matplotlib.cm as cm
 #import matplotlib.transforms as mtransforms
+os.getcwd()
+#print(os.environ['CONDA_PREFIX'])
+#print(os.environ['PROJ_LIB'])
 os.environ["PROJ_LIB"] = os.path.join(os.environ["CONDA_PREFIX"], "share", "proj")
+#os.environ["PROJ_LIB"] = os.path.join('C:\Users\emrus2\AppData\Local\anaconda3\share\proj')
 from mpl_toolkits.basemap import Basemap #installed using 
     #conda install -c anaconda basemap
 #import scipy.io
@@ -101,12 +105,18 @@ for metvar in metvars:
     #REDUCE VARIABLES TO DESIRED AREA
     #reduce lat
     latlims = np.logical_and(gridlat > latmin, gridlat < latmax)
+    print(latlims)
     latind = np.where(latlims)[0]
+    print(latind)
     gridlatreduced = gridlat[latind]
+    print(gridlatreduced)
     #reduce lon
     lonlims = np.logical_and(gridlon > lonmin, gridlon < lonmax)
+    print(lonlims)
     lonind = np.where(lonlims)[0]
+    print(lonind)
     gridlonreduced = gridlon[lonind]
+    print(gridlonreduced)
     #reduce pressure
     merrareduced = merra[:,latind,:]
     merrareduced = merrareduced[:,:,lonind]
@@ -235,5 +245,5 @@ for metvar in metvars:
     #SHOW MAP
     save_dir='I:\\Emma\\FIROWatersheds\\Figures\\Events'
     os.chdir(save_dir)
-    plt.savefig(f'{eventlength}day_event_{metvar}.png',dpi=300)
+    #plt.savefig(f'{eventlength}day_event_{metvar}.png',dpi=300)
     plt.show()

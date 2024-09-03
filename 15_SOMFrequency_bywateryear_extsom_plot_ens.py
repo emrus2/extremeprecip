@@ -14,7 +14,9 @@ UPDATED 6/12/2023
     #conda install netcdf4
 import numpy as np
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 #from matplotlib.colors import ListedColormap
 #import matplotlib.cm as cm
 #import matplotlib.transforms as mtransforms
@@ -39,6 +41,30 @@ totaldays = np.load(f'I:\\Emma\\FIROWatersheds\\Data\\{percentile}_{numpatterns}
 
 #data_prop = np.transpose(data_prop)
 #data_prop[np.isnan(data_prop)] = 0
+
+#%% IMPORT ENSO TEXT DATA
+enso = pd.read_csv('C:/Users/emrus2/Downloads/meiv2.data.txt',header=None, sep='\s+',index_col=0)
+print(enso)
+enso = enso.where(enso>-999,other=None)
+enso = enso.to_numpy()
+enso = enso.flatten()
+
+# create datetime series
+datestr = [datetime.strftime(datetime(1979,1,1)+timedelta(months=n),"%Y%m%d") for n in range(len(enso))]
+
+
+plt.fill_between(x,enso,color=[1,0.4,0.4],where=enso>0)
+plt.fill_between(range(len(enso)),enso,color=[0.8,0,0],where=enso>0.5)
+plt.fill_between(range(len(enso)), -3,3,where=enso>0.5,color='red',alpha=0.2)
+plt.fill_between(range(len(enso)), -3,3,where=enso<-0.5,color='blue',alpha=0.2)
+plt.fill_between(range(len(enso)),enso,color=[0.6,0.6,1],where=enso<0)
+plt.fill_between(range(len(enso)),enso,color=[0,0,0.9],where=enso<-0.5)
+save_dir='I:\\Emma\\FIROWatersheds\\figures\\NodeHistograms'
+os.chdir(save_dir)
+plt.savefig('enso.png',dpi=300,bbox_inches='tight')
+plt.show()
+#enso = np.genfromtxt('C:/Users/emrus2/Downloads/meiv2.data.txt',skip_header=1)
+#print(enso.loc[44])
     
 #%% CLUSTERED BAR CHART
 

@@ -96,6 +96,7 @@ metpath = {'Z500':'500_hPa_Geopotential_Height_3hourly','SLP':'Sea_level_pressur
 for metvar in metvars:
     folderpath = f'I:\\MERRA2\\Daily_and_Subdaily\\{metpath[metvar]}'
     os.chdir(folderpath)
+    print(os.getcwd())
     extremefiles = [file for file in os.listdir(folderpath) if any(date in file for date in extremedatesprior)]
     # sort extremefiles in case it is out of order
     #print(extremefiles)
@@ -130,7 +131,7 @@ for metvar in metvars:
     os.chdir(f'I:\\Emma\\FIROWatersheds\\Data\\DailyMERRA2\\{metvar}')
     savefile = f'MERRA2_{metvar}_Yuba_Extremes{percentile}_Daily_1980-2021_WINTERDIST_{daysprior+1}d.nc'
     #savefile2 = f'{metvar}_extremes_composite.nc'
-    ds.to_netcdf(savefile)
+    i#ds.to_netcdf(savefile)
     #total_means.to_netcdf(savefile2)
     
     #%% SAVE LIST OF SUCCEEDING EXTREME DAYS
